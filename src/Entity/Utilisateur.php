@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UtilisateurRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
@@ -24,6 +26,21 @@ class Utilisateur
 
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $prenom = null;
+
+    #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Role $Role = null;
+
+    /**
+     * @var Collection<int, RapportVeterinaire>
+     */
+    #[ORM\OneToMany(targetEntity: RapportVeterinaire::class, mappedBy: 'Utilisateur', orphanRemoval: true)]
+    private Collection $rapportVeterinaires;
+
+    public function __construct()
+    {
+        $this->rapportVeterinaires = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -74,6 +91,48 @@ class Utilisateur
     public function setPrenom(?string $prenom): static
     {
         $this->prenom = $prenom;
+
+        return $this;
+    }
+
+    public function getRole(): ?Role
+    {
+        return $this->Role;
+    }
+
+    public function setRole(?Role $Role): static
+    {
+        $this->Role = $Role;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RapportVeterinaire>
+     */
+    public function getRapportVeterinaires(): Collection
+    {
+        return $this->rapportVeterinaires;
+    }
+
+    public function addRapportVeterinaire(RapportVeterinaire $rapportVeterinaire): static
+    {
+        if (!$this->rapportVeterinaires->contains($rapportVeterinaire)) {
+            $this->rapportVeterinaires->add($rapportVeterinaire);
+            $rapportVeterinaire->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRapportVeterinaire(RapportVeterinaire $rapportVeterinaire): static
+    {
+        if ($this->rapportVeterinaires->removeElement($rapportVeterinaire)) {
+            // set the owning side to null (unless already changed)
+            if ($rapportVeterinaire->getUtilisateur() === $this) {
+                $rapportVeterinaire->setUtilisateur(null);
+            }
+        }
 
         return $this;
     }
