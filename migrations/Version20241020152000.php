@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20241019134523 extends AbstractMigration
+final class Version20241020152000 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -20,16 +20,20 @@ final class Version20241019134523 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE rapport_veterinaire ADD utilisateur_id INT NOT NULL');
+        $this->addSql('ALTER TABLE rapport_veterinaire ADD utilisateur_id INT DEFAULT NULL, ADD animal_id INT DEFAULT NULL');
         $this->addSql('ALTER TABLE rapport_veterinaire ADD CONSTRAINT FK_CE729CDEFB88E14F FOREIGN KEY (utilisateur_id) REFERENCES utilisateur (id)');
+        $this->addSql('ALTER TABLE rapport_veterinaire ADD CONSTRAINT FK_CE729CDE8E962C16 FOREIGN KEY (animal_id) REFERENCES animal (id)');
         $this->addSql('CREATE INDEX IDX_CE729CDEFB88E14F ON rapport_veterinaire (utilisateur_id)');
+        $this->addSql('CREATE INDEX IDX_CE729CDE8E962C16 ON rapport_veterinaire (animal_id)');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE rapport_veterinaire DROP FOREIGN KEY FK_CE729CDEFB88E14F');
+        $this->addSql('ALTER TABLE rapport_veterinaire DROP FOREIGN KEY FK_CE729CDE8E962C16');
         $this->addSql('DROP INDEX IDX_CE729CDEFB88E14F ON rapport_veterinaire');
-        $this->addSql('ALTER TABLE rapport_veterinaire DROP utilisateur_id');
+        $this->addSql('DROP INDEX IDX_CE729CDE8E962C16 ON rapport_veterinaire');
+        $this->addSql('ALTER TABLE rapport_veterinaire DROP utilisateur_id, DROP animal_id');
     }
 }

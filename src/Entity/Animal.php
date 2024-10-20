@@ -24,16 +24,14 @@ class Animal
     /**
      * @var Collection<int, RapportVeterinaire>
      */
-    #[ORM\OneToMany(targetEntity: RapportVeterinaire::class, mappedBy: 'Animal', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: RapportVeterinaire::class, mappedBy: 'animal')]
     private Collection $rapportVeterinaires;
 
     #[ORM\ManyToOne(inversedBy: 'animals')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Race $Race = null;
+    private ?race $race = null;
 
     #[ORM\ManyToOne(inversedBy: 'animals')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Habitat $Habitat = null;
+    private ?habitat $habitat = null;
 
     public function __construct()
     {
@@ -99,26 +97,26 @@ class Animal
         return $this;
     }
 
-    public function getRace(): ?Race
+    public function getRace(): ?race
     {
-        return $this->Race;
+        return $this->race;
     }
 
-    public function setRace(?Race $Race): static
+    public function setRace(?race $race): static
     {
-        $this->Race = $Race;
+        $this->race = $race;
 
         return $this;
     }
 
-    public function getHabitat(): ?Habitat
+    public function getHabitat(): ?habitat
     {
-        return $this->Habitat;
+        return $this->habitat;
     }
 
-    public function setHabitat(?Habitat $Habitat): static
+    public function setHabitat(?habitat $habitat): static
     {
-        $this->Habitat = $Habitat;
+        $this->habitat = $habitat;
 
         return $this;
     }

@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ImageRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -17,9 +19,16 @@ class Image
     #[ORM\Column(type: Types::BLOB)]
     private $image_data;
 
-    #[ORM\ManyToOne(inversedBy: 'images')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Habitat $Habitat = null;
+    /**
+     * @var Collection<int, habitat>
+     */
+    #[ORM\ManyToMany(targetEntity: habitat::class, inversedBy: 'images')]
+    private Collection $habitat;
+
+    public function __construct()
+    {
+        $this->habitat = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -38,14 +47,26 @@ class Image
         return $this;
     }
 
-    public function getHabitat(): ?Habitat
+    /**
+     * @return Collection<int, habitat>
+     */
+    public function getHabitat(): Collection
     {
-        return $this->Habitat;
+        return $this->habitat;
     }
 
-    public function setHabitat(?Habitat $Habitat): static
+    public function addHabitat(habitat $habitat): static
     {
-        $this->Habitat = $Habitat;
+        if (!$this->habitat->contains($habitat)) {
+            $this->habitat->add($habitat);
+        }
+
+        return $this;
+    }
+
+    public function removeHabitat(habitat $habitat): static
+    {
+        $this->habitat->removeElement($habitat);
 
         return $this;
     }

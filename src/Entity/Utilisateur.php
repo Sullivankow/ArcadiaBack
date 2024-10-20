@@ -28,13 +28,12 @@ class Utilisateur
     private ?string $prenom = null;
 
     #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Role $Role = null;
+    private ?role $role = null;
 
     /**
      * @var Collection<int, RapportVeterinaire>
      */
-    #[ORM\OneToMany(targetEntity: RapportVeterinaire::class, mappedBy: 'Utilisateur', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: RapportVeterinaire::class, mappedBy: 'utilisateur')]
     private Collection $rapportVeterinaires;
 
     public function __construct()
@@ -95,14 +94,14 @@ class Utilisateur
         return $this;
     }
 
-    public function getRole(): ?Role
+    public function getRole(): ?role
     {
-        return $this->Role;
+        return $this->role;
     }
 
-    public function setRole(?Role $Role): static
+    public function setRole(?role $role): static
     {
-        $this->Role = $Role;
+        $this->role = $role;
 
         return $this;
     }

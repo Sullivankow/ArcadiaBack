@@ -21,7 +21,7 @@ class Role
     /**
      * @var Collection<int, Utilisateur>
      */
-    #[ORM\OneToMany(targetEntity: Utilisateur::class, mappedBy: 'Role', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Utilisateur::class, mappedBy: 'role')]
     private Collection $utilisateurs;
 
     public function __construct()

@@ -18,22 +18,22 @@ class Habitat
     #[ORM\Column(length: 50)]
     private ?string $nom = null;
 
-    #[ORM\Column(length: 155)]
+    #[ORM\Column(length: 154)]
     private ?string $description = null;
 
-    #[ORM\Column(length: 155)]
+    #[ORM\Column(length: 154, nullable: true)]
     private ?string $commentaire_habitat = null;
 
     /**
      * @var Collection<int, Animal>
      */
-    #[ORM\OneToMany(targetEntity: Animal::class, mappedBy: 'Habitat', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Animal::class, mappedBy: 'habitat')]
     private Collection $animals;
 
     /**
      * @var Collection<int, Image>
      */
-    #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'Habitat', orphanRemoval: true)]
+    #[ORM\ManyToMany(targetEntity: Image::class, mappedBy: 'habitat')]
     private Collection $images;
 
     public function __construct()
@@ -76,7 +76,7 @@ class Habitat
         return $this->commentaire_habitat;
     }
 
-    public function setCommentaireHabitat(string $commentaire_habitat): static
+    public function setCommentaireHabitat(?string $commentaire_habitat): static
     {
         $this->commentaire_habitat = $commentaire_habitat;
 
@@ -125,7 +125,7 @@ class Habitat
     {
         if (!$this->images->contains($image)) {
             $this->images->add($image);
-            $image->setHabitat($this);
+            $image->addHabitat($this);
         }
 
         return $this;
@@ -134,10 +134,7 @@ class Habitat
     public function removeImage(Image $image): static
     {
         if ($this->images->removeElement($image)) {
-            // set the owning side to null (unless already changed)
-            if ($image->getHabitat() === $this) {
-                $image->setHabitat(null);
-            }
+            $image->removeHabitat($this);
         }
 
         return $this;
