@@ -1,13 +1,13 @@
 <?php
 
 namespace App\Controller;
-
 use App\Entity\Utilisateur;
 use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Response;
+
 
 
 
@@ -25,7 +25,7 @@ public function __construct(
 
 //METHODE POST
     #[Route(name: 'new', methods: ['POST'])]
-  public function new(int $id): Response
+  public function new(): Response
   {
 
 
@@ -37,6 +37,7 @@ $utilisateur->setUsername('testcrud@mail.com');
 $utilisateur->setPassword('Azerty_123');
 $utilisateur->setNom('koko');
 $utilisateur->setPrenom('jean');
+
 
 
 //On met l'objet sur liste d'attente avec persist puis on le push avec flush

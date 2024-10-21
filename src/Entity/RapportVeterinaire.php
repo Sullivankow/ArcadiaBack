@@ -21,10 +21,10 @@ class RapportVeterinaire
     private ?string $detail = null;
 
     #[ORM\ManyToOne(inversedBy: 'rapportVeterinaires')]
-    private ?utilisateur $utilisateur = null;
+    private ?Utilisateur $utilisateur = null;
 
     #[ORM\ManyToOne(inversedBy: 'rapportVeterinaires')]
-    private ?animal $animal = null;
+    private ?Animal $animal = null;
 
     public function getId(): ?int
     {
@@ -67,12 +67,12 @@ class RapportVeterinaire
         return $this;
     }
 
-    public function getAnimal(): ?animal
+    public function getAnimal(): ?Animal
     {
         return $this->animal;
     }
 
-    public function setAnimal(?animal $animal): static
+    public function setAnimal(?Animal $animal): static
     {
         $this->animal = $animal;
 

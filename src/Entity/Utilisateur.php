@@ -28,7 +28,7 @@ class Utilisateur
     private ?string $prenom = null;
 
     #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
-    private ?role $role = null;
+    private ?Role $role = null;
 
     /**
      * @var Collection<int, RapportVeterinaire>
@@ -94,12 +94,12 @@ class Utilisateur
         return $this;
     }
 
-    public function getRole(): ?role
+    public function getRole(): ?Role
     {
         return $this->role;
     }
 
-    public function setRole(?role $role): static
+    public function setRole(?Role $role): static
     {
         $this->role = $role;
 

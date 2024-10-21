@@ -28,10 +28,10 @@ class Animal
     private Collection $rapportVeterinaires;
 
     #[ORM\ManyToOne(inversedBy: 'animals')]
-    private ?race $race = null;
+    private ?Race $race = null;
 
     #[ORM\ManyToOne(inversedBy: 'animals')]
-    private ?habitat $habitat = null;
+    private ?Habitat $habitat = null;
 
     public function __construct()
     {
@@ -97,24 +97,24 @@ class Animal
         return $this;
     }
 
-    public function getRace(): ?race
+    public function getRace(): ?Race
     {
         return $this->race;
     }
 
-    public function setRace(?race $race): static
+    public function setRace(?Race $race): static
     {
         $this->race = $race;
 
         return $this;
     }
 
-    public function getHabitat(): ?habitat
+    public function getHabitat(): ?Habitat
     {
         return $this->habitat;
     }
 
-    public function setHabitat(?habitat $habitat): static
+    public function setHabitat(?Habitat $habitat): static
     {
         $this->habitat = $habitat;
 
