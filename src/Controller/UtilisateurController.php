@@ -59,7 +59,7 @@ Response::HTTP_CREATED
     #[Route('/{id}', 'show', methods: ['GET'])]
     public function show(int $id): Response
     {
-
+$utilisateur = $this->utilisateurRepository->findOneBy(['id' => $id]);
         // $utilisateur = Chercher utilisateur avec l'id = 1
         if(!$utilisateur) {
             throw new \Exception ("no utilisateur found for {$id} id" );
@@ -76,11 +76,13 @@ return $this->json(
     #[Route('/{id}', name: 'edit', methods: ['PUT'])]
     public function edit(int $id): Response
     {
-
+        $utilisateur = $this->utilisateurRepository->findOneBy(['id' => $id]);
         if (!$utilisateur) {
             throw new \Exception("no utilisateur found for {$id} id");
         }
 $utilisateur->setNom('utilisateur name updated');
+        $this->manager->flush();
+
 return $this->redirectToRoute('app_api_utilisateur_show', ['id'=> $utilisateur->getId()]);
     }
 
@@ -93,7 +95,7 @@ return $this->redirectToRoute('app_api_utilisateur_show', ['id'=> $utilisateur->
     public function delete(int $id): Response
     {
 
-
+        $utilisateur = $this->utilisateurRepository->findOneBy(['id' => $id]);
         // $utilisateur = Chercher utilisateur avec l'id = 1
         if (!$utilisateur) {
             throw new \Exception("no utilisateur found for {$id} id");
