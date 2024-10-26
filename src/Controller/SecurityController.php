@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use OpenApi\Attributes as OA;
+
 
 
 
@@ -21,12 +23,49 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 #[Route('/api', name: 'app_api_')]
 class SecurityController extends AbstractController
 {
-public function __construct(private EntityManagerInterface $manager, private serializerInterface $serializer)
+public function __construct(private EntityManagerInterface $manager, private SerializerInterface $serializer)
 {
 
 }
 
     #[Route('/registration', name: 'registration', methods:['POST'])]
+
+    #[OA\Post(
+        path: "/api/registration",
+        summary: "Inscription d'un nouvel utilisateur",
+        requestBody: new OA\RequestBody(
+            required: true,
+            description: "Données de l'utilisateur à inscrire",
+            content: new OA\JsonContent(
+                type: "object",
+                properties: [
+                    new OA\Property(property: "email", type: "string", example: "adresse@email.com"),
+                    new OA\Property(property: "password", type: "string", example: "Mot de passe")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: "Utilisateur inscrit avec succès",
+                content: new OA\JsonContent(
+                    type: "object",
+                    properties: [
+                        new OA\Property(property: "user", type: "string", example: "Nom d'utilisateur"),
+                        new OA\Property(property: "apiToken", type: "string", example: "31a023e212f116124a36af14ea0c1c3806eb9378"),
+                        new OA\Property(property: "roles", type: "array", items: new OA\Items(type: "string", example: "ROLE_USER"))
+                    ]
+                )
+            )
+        ]
+    )]
+   
+
+
+
+
+
+
     public function register(Request $request, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
 
