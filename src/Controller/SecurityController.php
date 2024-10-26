@@ -85,6 +85,44 @@ public function __construct(private EntityManagerInterface $manager, private Ser
 //system d'authentification
 
 #[Route('/login', name: 'login', methods: 'POST')]
+
+
+    #[OA\Post(
+        path: "/api/login",
+        summary: "Connecter un utilisateur",
+        requestBody: new OA\RequestBody(
+            required: true,
+            description: "Données de l’utilisateur pour se connecter",
+            content: new OA\JsonContent(
+                type: "object",
+                properties: [
+                    new OA\Property(property: "username", type: "string", example: "adresse@email.com"),
+                    new OA\Property(property: "password", type: "string", example: "Mot de passe")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Connexion réussie",
+                content: new OA\JsonContent(
+                    type: "object",
+                    properties: [
+                        new OA\Property(property: "user", type: "string", example: "Nom d'utilisateur"),
+                        new OA\Property(property: "apiToken", type: "string", example: "31a023e212f116124a36af14ea0c1c3806eb9378"),
+                        new OA\Property(property: "roles", type: "array", items: new OA\Items(type: "string", example: "ROLE_USER"))
+                    ]
+                )
+            )
+        ]
+    )]
+
+
+
+
+
+
+
     public function login(#[CurrentUser] ?User $user): JsonResponse //Va chercher l'utilisateur en base de données
     {
         if (null === $user) {
