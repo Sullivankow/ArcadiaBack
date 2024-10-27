@@ -3,6 +3,7 @@
 namespace App\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use function PHPUnit\Framework\assertStringContainsString;
 
 class SmokeTest extends WebTestCase
 {
@@ -26,11 +27,29 @@ class SmokeTest extends WebTestCase
     }
 
 
+
+    public function testLogonRouteCanConnectAValidUser(): void
+    {
+        $client = self::createClient();
+        
+        $client->request('POST', '/api/login', [], [], [
+'CONTENT_TYPE' => 'application/json',
+        ],
+         json_encode ([
+    'username' => 'tototo@mail.com',
+    'password' => 'Madinalake_3',
+], JSON_THROW_ON_ERROR));
+
+        $statusCode = $client->getResponse()->getStatusCode();
+        dd($statusCode);
+        $this->assertEquals(200, $statusCode);
+        $content = $client->getResponse()->getContent();
+        $this->assertStringContainsString('user', $content);
+        dd($content);
+    }
+
+
+
+
+
 }
-
-
-
-
-
-
-
