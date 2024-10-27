@@ -118,6 +118,45 @@ class HabitatController extends AbstractController
     //METHODE GET
 
     #[Route('/{id}', 'show', methods: ['GET'])]
+
+    #[OA\Get(
+        summary: "Afficher habitat",
+        parameters: [
+            new OA\Parameter(
+                name: "id",
+                in: "path",
+                required: true,
+                description: "ID de l'habitat à afficher",
+                schema: new OA\Schema(type: "integer")
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Habitat trouvé avec succès",
+                content: new OA\JsonContent(
+                    type: "object",
+                    properties: [
+                        new OA\Property(property: "id", type: "integer", example: 1),
+                        new OA\Property(property: "name", type: "string", example: "Nom de l'habitat"),
+                        new OA\Property(property: "description", type: "string", example: "Description de l'habitat"),
+                        
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Habitat non trouvé" 
+            )
+        ]
+    )]
+
+
+
+
+
+
+
     public function show(int $id): Response
     {
         $habitat = $this->habitatRepository->findOneBy(['id' => $id]);
@@ -135,6 +174,49 @@ class HabitatController extends AbstractController
 
     //METHODE PUT
     #[Route('/{id}', name: 'edit', methods: ['PUT'])]
+
+
+    #[OA\Put(
+        summary: "Modifier habitat",
+        parameters: [
+            new OA\Parameter(
+                name: "id",
+                in: "path",
+                required: true,
+                description: "ID de l'habitat à modifier",
+                schema: new OA\Schema(type: "integer")
+            )
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                type: "object",
+                properties: [
+                    new OA\Property(property: "nom", type: "string", example: "Nom de l'habitat"),
+                    new OA\Property(property: "description", type: "string", example: "Description de l'habitat"),
+                    new OA\Property(property: "commentaire", type: "string", example: "Commentaire sur l'habitat")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Habitat modifié avec succès"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Habitat non trouvé"
+            )
+        ]
+    )]
+
+
+
+
+
+
+
+
     public function edit(int $id, Request $request): JsonResponse
     {
         $habitat = $this->habitatRepository->findOneBy(['id' => $id]);
@@ -148,7 +230,7 @@ class HabitatController extends AbstractController
                 [AbstractNormalizer::OBJECT_TO_POPULATE => $habitat]
             );
 
-
+            $this->manager->flush();
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);
         }
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
@@ -161,6 +243,35 @@ class HabitatController extends AbstractController
     //METHODE DELETE
 
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
+
+
+
+    #[OA\Delete(
+        summary: "Supprimer un habitat",
+        parameters: [
+            new OA\Parameter(
+                name: "id",
+                in: "path",
+                required: true,
+                description: "ID de l'habitat à supprimer",
+                schema: new OA\Schema(type: "integer")
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 204,
+                description: "Habitat supprimé avec succès"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Habitat non trouvé"
+            )
+        ]
+    )]
+
+
+
+
     public function delete(int $id): Response
     {
 
