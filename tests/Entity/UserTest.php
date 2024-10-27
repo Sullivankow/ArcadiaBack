@@ -7,7 +7,7 @@ use App\Entity\User;
 
 
 
-class UserTest extends TestCase
+class userTest extends TestCase
 {
 
 public function testTheAutomaticApiTokenSettingWhenAnUserIsCreated(): void {   //Récupère t-il l'api token?
