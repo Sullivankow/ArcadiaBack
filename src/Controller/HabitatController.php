@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\{JsonResponse, Request, Response};
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
+use OpenApi\Attributes as OA;
 
 
 
@@ -31,7 +32,49 @@ class HabitatController extends AbstractController
 
     //METHODE POST
     #[Route(methods: ['POST'])]
-    public function new(Request $request): JsonResponse
+
+    #[OA\Post(
+        summary: "Créer un nouvel habitat",
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                type: "object",
+                properties: [
+                    new OA\Property(property: "nom", type: "string", example: "Nom de l'habitat"),
+                    new OA\Property(property: "description", type: "string", example: "Description de l'habitat"),
+                    new OA\Property(property: "commentaire", type: "string", example: "Commentaire sur l'habitat")
+                ]
+            )
+        ),
+        responses: [  // Utilisation correcte de 'responses' ici
+            new OA\Response(
+                response: 201,
+                description: "Habitat créé avec succès", // Correction du message
+                content: new OA\JsonContent(
+                    type: "object",
+                    properties: [
+                        new OA\Property(property: "id", type: "integer", example: 1),
+                        new OA\Property(property: "name", type: "string", example: "Nom de l'habitat"),
+                        new OA\Property(property: "description", type: "string", example: "Description de l'habitat"),
+                        new OA\Property(property: "createdAt", type: "string", format: "date-time")
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Habitat non trouvé" // Correction du message
+            )
+        ]
+    )]
+
+
+
+
+
+
+
+
+      public function new(Request $request): JsonResponse
     {
         //Création d'un objet utilisateur static en dur avecc de fausses données pour tester l'api
 // $utilisateur = new Utilisateur();
@@ -132,6 +175,5 @@ class HabitatController extends AbstractController
         return $this->json(['Message' => 'habitat resource deleted'], Response::HTTP_NO_CONTENT);
     }
 }
-
 
 
