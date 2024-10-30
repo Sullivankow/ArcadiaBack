@@ -36,8 +36,8 @@ class SmokeTest extends WebTestCase
 'CONTENT_TYPE' => 'application/json',
         ],
          json_encode ([
-    'username' => 'tototo@mail.com',
-    'password' => 'Madinalake_3',
+    'username' => 'email.1@ecf.fr',
+    'password' => 'password$i',
 ], JSON_THROW_ON_ERROR));
 
         $statusCode = $client->getResponse()->getStatusCode();
