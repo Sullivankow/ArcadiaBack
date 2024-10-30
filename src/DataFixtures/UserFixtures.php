@@ -14,7 +14,7 @@ class UserFixtures extends Fixture
     {
 
     }
-    public function load(ObjectManager $manager): void   //Création de datafixtures(FAUSES DONNEES)
+    public function load(ObjectManager $manager): void   //Création de datafixtures(FAUSSES DONNEES)
     {
       
 for($i=1; $i <= 20; $i++) {
