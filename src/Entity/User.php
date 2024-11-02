@@ -1,13 +1,13 @@
 <?php
 
 namespace App\Entity;
-
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use App\Entity\Role;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
@@ -49,7 +49,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $rapportVeterinaires;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
-    private ?role $role = null;
+    private ?Role $role = null;
 
     /** @throws \Exception */
 
@@ -199,12 +199,12 @@ $this->rapportVeterinaires = new ArrayCollection();
         return $this;
     }
 
-    public function getRole(): ?role
+    public function getRole(): ?Role
     {
         return $this->role;
     }
 
-    public function setRole(?role $role): static
+    public function setRole(?Role $role): static
     {
         $this->role = $role;
 

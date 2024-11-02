@@ -6,6 +6,7 @@ use App\Repository\RaceRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Animal;
 
 #[ORM\Entity(repositoryClass: RaceRepository::class)]
 class Race

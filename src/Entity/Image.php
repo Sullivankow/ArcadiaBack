@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\ImageRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Habitat;
 
 #[ORM\Entity(repositoryClass: ImageRepository::class)]
 class Image
@@ -18,7 +19,7 @@ class Image
     private $image_data;
 
     #[ORM\ManyToOne(inversedBy: 'images')]
-    private ?habitat $habitat = null;
+    private ?Habitat $habitat = null;
 
     public function getId(): ?int
     {
@@ -37,12 +38,12 @@ class Image
         return $this;
     }
 
-    public function getHabitat(): ?habitat
+    public function getHabitat(): ?Habitat
     {
         return $this->habitat;
     }
 
-    public function setHabitat(?habitat $habitat): static
+    public function setHabitat(?Habitat $habitat): static
     {
         $this->habitat = $habitat;
 

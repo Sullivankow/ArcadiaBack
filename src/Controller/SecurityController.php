@@ -40,7 +40,8 @@ public function __construct(private EntityManagerInterface $manager, private Ser
                 type: "object",
                 properties: [
                     new OA\Property(property: "email", type: "string", example: "adresse@email.com"),
-                    new OA\Property(property: "password", type: "string", example: "Mot de passe")
+                    new OA\Property(property: "password", type: "string", example: "Mot de passe"),
+                    
                 ]
             )
         ),
@@ -72,6 +73,7 @@ public function __construct(private EntityManagerInterface $manager, private Ser
         $user = $this->serializer->deserialize($request->getContent(), User::class, 'json');
         $user->setPassword ($passwordHasher->hashPassword($user, $user->getPassword()));
 
+        
 
 
         $this->manager->persist($user);
@@ -84,7 +86,7 @@ public function __construct(private EntityManagerInterface $manager, private Ser
 
 //system d'authentification
 
-#[Route('/login', name: 'login', methods: 'POST')]
+#[Route('/login', name: 'login', methods: ['POST'])]
 
 
     #[OA\Post(
