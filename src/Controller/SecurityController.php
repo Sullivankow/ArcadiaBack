@@ -41,6 +41,8 @@ public function __construct(private EntityManagerInterface $manager, private Ser
                 properties: [
                     new OA\Property(property: "email", type: "string", example: "adresse@email.com"),
                     new OA\Property(property: "password", type: "string", example: "Mot de passe"),
+                    new OA\Property(property: "Roles", type: "string", example: ["rôle"]),
+                  
                     
                 ]
             )
