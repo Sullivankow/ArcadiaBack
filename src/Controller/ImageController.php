@@ -1,8 +1,8 @@
 <?php
 
 namespace App\Controller;
-use App\Entity\Habitat;
-use App\Repository\HabitatRepository;
+use App\Entity\Image;
+use App\Repository\ImageRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
@@ -16,13 +16,13 @@ use OpenApi\Attributes as OA;
 
 
 
-#[Route('api/habitat', name: 'app_api_habitat')]
-class HabitatController extends AbstractController
+#[Route('api/image', name: 'app_api_image')]
+class ImageController extends AbstractController
 {
 
     public function __construct(
         private EntityManagerInterface $manager,
-        private HabitatRepository $habitatRepository,
+        private ImageRepository $imageRepository,
         private SerializerInterface $serializer,
         private UrlGeneratorInterface $urlGenerator,
     ) {
@@ -34,35 +34,35 @@ class HabitatController extends AbstractController
     #[Route(methods: ['POST'])]
 
     #[OA\Post(
-        summary: "Créer un nouvel habitat",
+        summary: "Ajouter une nouvelle image",
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
                 type: "object",
                 properties: [
-                    new OA\Property(property: "nom", type: "string", example: "Nom de l'habitat"),
-                    new OA\Property(property: "description", type: "string", example: "Description de l'habitat"),
-                    new OA\Property(property: "commentaire_habitat", type: "string", example: "Commentaire sur l'habitat")
+                    new OA\Property(property: "image_data", type: "blob", example: "image de l'habitat"),
+                    
+
                 ]
             )
         ),
         responses: [  // Utilisation correcte de 'responses' ici
             new OA\Response(
                 response: 201,
-                description: "Habitat créé avec succès", // Correction du message
+                description: "Image ajoutée avec succès", // Correction du message
                 content: new OA\JsonContent(
                     type: "object",
                     properties: [
                         new OA\Property(property: "id", type: "integer", example: 1),
-                        new OA\Property(property: "nom", type: "string", example: "Nom de l'habitat"),
-                        new OA\Property(property: "description", type: "string", example: "Description de l'habitat"),
-                        new OA\Property(property: "commentaire_habitat", type: "string", format: "Commentaire sur l'habitat")
+                        new OA\Property(property: "image_data", type: "blob", example: "image de l'habitat"),
+                        
+
                     ]
                 )
             ),
             new OA\Response(
                 response: 404,
-                description: "Habitat non trouvé" // Correction du message
+                description: "Image non trouvé" // Correction du message
             )
         ]
     )]
@@ -74,9 +74,9 @@ class HabitatController extends AbstractController
 
 
 
-      public function new(Request $request): JsonResponse
+    public function new(Request $request): JsonResponse
     {
-        //Création d'un objet utilisateur static en dur avecc de fausses données pour tester l'api
+        //Création d'un objet utilisateur static en dur avec de fausses données pour tester l'api
 // $utilisateur = new Utilisateur();
 // $utilisateur->setUsername('testcrud@mail.com');
 // $utilisateur->setPassword('Azerty_123');
@@ -85,23 +85,23 @@ class HabitatController extends AbstractController
 
 
         //Serialiszer transforme un format en un autre format
-        $habitat = $this->serializer->deserialize($request->getContent(), Habitat::class, 'json');
+        $image = $this->serializer->deserialize($request->getContent(), Image::class, 'json');
 
 
 
 
         //On met l'objet sur liste d'attente avec persist puis on le push avec flush
-        $this->manager->persist($habitat);
+        $this->manager->persist($image);
         $this->manager->flush();
 
 
-        $responseData = $this->serializer->serialize($habitat, 'json');
+        $responseData = $this->serializer->serialize($image, 'json');
 
         $location = $this->urlGenerator->generate(
 
-            'app_api_habitatshow',
+            'app_api_imageshow',
 
-            ['id' => $habitat->getId()],
+            ['id' => $image->getId()],
 
             UrlGeneratorInterface::ABSOLUTE_URL,
         );
@@ -120,34 +120,33 @@ class HabitatController extends AbstractController
     #[Route('/{id}', 'show', methods: ['GET'])]
 
     #[OA\Get(
-        summary: "Afficher habitat",
+        summary: "Afficher l'image",
         parameters: [
             new OA\Parameter(
                 name: "id",
                 in: "path",
                 required: true,
-                description: "ID de l'habitat à afficher",
+                description: "ID de l'image à afficher",
                 schema: new OA\Schema(type: "integer")
             )
         ],
         responses: [
             new OA\Response(
                 response: 200,
-                description: "Habitat trouvé avec succès",
+                description: "Image trouvé avec succès",
                 content: new OA\JsonContent(
                     type: "object",
                     properties: [
                         new OA\Property(property: "id", type: "integer", example: 1),
-                        new OA\Property(property: "nom", type: "string", example: "Nom de l'habitat"),
-                        new OA\Property(property: "description", type: "string", example: "Description de l'habitat"),
-                        new OA\Property(property: "commentaire_habitat", type: "string", example: "Commentaire sur l'habitat"),
+                        new OA\Property(property: "image_data", type: "blob", example: "Image de l'habitat"),
                         
+
                     ]
                 )
             ),
             new OA\Response(
                 response: 404,
-                description: "Habitat non trouvé"
+                description: "Image non trouvé"
             )
         ]
     )]
@@ -160,10 +159,10 @@ class HabitatController extends AbstractController
 
     public function show(int $id): Response
     {
-        $habitat = $this->habitatRepository->findOneBy(['id' => $id]);
+        $image = $this->imageRepository->findOneBy(['id' => $id]);
         // $utilisateur = Chercher utilisateur avec l'id = 1
-        if ($habitat) {
-            $responseData = $this->serializer->serialize($habitat, 'json');
+        if ($image) {
+            $responseData = $this->serializer->serialize($image, 'json');
             return new JsonResponse($responseData, Response::HTTP_OK, [], true);
         }
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
@@ -178,13 +177,13 @@ class HabitatController extends AbstractController
 
 
     #[OA\Put(
-        summary: "Modifier habitat",
+        summary: "Modifier l'image",
         parameters: [
             new OA\Parameter(
                 name: "id",
                 in: "path",
                 required: true,
-                description: "ID de l'habitat à modifier",
+                description: "ID de l'image à modifier",
                 schema: new OA\Schema(type: "integer")
             )
         ],
@@ -193,20 +192,20 @@ class HabitatController extends AbstractController
             content: new OA\JsonContent(
                 type: "object",
                 properties: [
-                    new OA\Property(property: "nom", type: "string", example: "Nom de l'habitat"),
-                    new OA\Property(property: "description", type: "string", example: "Description de l'habitat"),
-                    new OA\Property(property: "commentaire", type: "string", example: "Commentaire sur l'habitat")
+                    new OA\Property(property: "image_data", type: "blob", example: "Image de l'habitat"),
+                    
+
                 ]
             )
         ),
         responses: [
             new OA\Response(
                 response: 200,
-                description: "Habitat modifié avec succès"
+                description: "Image modifié avec succès"
             ),
             new OA\Response(
                 response: 404,
-                description: "Habitat non trouvé"
+                description: "Image non trouvé"
             )
         ]
     )]
@@ -220,15 +219,15 @@ class HabitatController extends AbstractController
 
     public function edit(int $id, Request $request): JsonResponse
     {
-        $habitat = $this->habitatRepository->findOneBy(['id' => $id]);
+        $image = $this->imageRepository->findOneBy(['id' => $id]);
 
 
-        if ($habitat) {
-            $habitat = $this->serializer->deserialize(
+        if ($image) {
+            $image = $this->serializer->deserialize(
                 $request->getContent(),
-                Habitat::class,
+                Image::class,
                 'json',
-                [AbstractNormalizer::OBJECT_TO_POPULATE => $habitat]
+                [AbstractNormalizer::OBJECT_TO_POPULATE => $image]
             );
 
             $this->manager->flush();
@@ -248,24 +247,24 @@ class HabitatController extends AbstractController
 
 
     #[OA\Delete(
-        summary: "Supprimer un habitat",
+        summary: "Supprimer une image",
         parameters: [
             new OA\Parameter(
                 name: "id",
                 in: "path",
                 required: true,
-                description: "ID de l'habitat à supprimer",
+                description: "ID de l'image à supprimer",
                 schema: new OA\Schema(type: "integer")
             )
         ],
         responses: [
             new OA\Response(
                 response: 204,
-                description: "Habitat supprimé avec succès"
+                description: "Image supprimé avec succès"
             ),
             new OA\Response(
                 response: 404,
-                description: "Habitat non trouvé"
+                description: "Image non trouvé"
             )
         ]
     )]
@@ -276,16 +275,14 @@ class HabitatController extends AbstractController
     public function delete(int $id): Response
     {
 
-        $habitat = $this->habitatRepository->findOneBy(['id' => $id]);
+        $image = $this->imageRepository->findOneBy(['id' => $id]);
         // $utilisateur = Chercher utilisateur avec l'id = 1
-        if (!$habitat) {
-            throw new \Exception("no habitat found for {$id} id");
+        if (!$image) {
+            throw new \Exception("no picture found for {$id} id");
         }
 
-        $this->manager->remove($habitat); //S'il ne trouve pas, il supprime l'information
+        $this->manager->remove($image); //S'il ne trouve pas, il supprime l'information
         $this->manager->flush();
-        return $this->json(['Message' => 'habitat resource deleted'], Response::HTTP_NO_CONTENT);
+        return $this->json(['Message' => 'picture resource deleted'], Response::HTTP_NO_CONTENT);
     }
 }
-
-
