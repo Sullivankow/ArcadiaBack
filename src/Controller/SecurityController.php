@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 use App\Entity\User;
+
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -11,6 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use DateTimeImmutable;
 use OpenApi\Attributes as OA;
 
 
@@ -23,7 +26,7 @@ use OpenApi\Attributes as OA;
 #[Route('/api', name: 'app_api_')]
 class SecurityController extends AbstractController
 {
-public function __construct(private EntityManagerInterface $manager, private SerializerInterface $serializer)
+public function __construct(private EntityManagerInterface $manager, private SerializerInterface $serializer, private UserPasswordHasherInterface $passwordHasher, )
 {
 
 }
@@ -39,7 +42,7 @@ public function __construct(private EntityManagerInterface $manager, private Ser
             content: new OA\JsonContent(
                 type: "object",
                 properties: [
-                    new OA\Property(property: "email", type: "string", example: "adresse@email.com"),
+                    new OA\Property(property: "email", type: "string", example: "mail@email.com"),
                     new OA\Property(property: "password", type: "string", example: "Mot de passe"),
                     new OA\Property(property: "Roles", type: "string", example: ["rôle"]),
                   
@@ -139,8 +142,123 @@ public function __construct(private EntityManagerInterface $manager, private Ser
             'roles' => $user->getRoles(),
         ]);
     }
+
+    
+
+
+
+
+
+
+
+#[Route('/account/me', name: 'me', methods: 'GET')]
+    /** @OA\Get(
+     *     path="/api/account/me",
+     *     summary="Récupérer toutes les informations de l'objet User",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Tous les champs utilisateurs retournés",
+     *     )
+     * )
+     */
+    public function me(): JsonResponse
+    {
+        $user = $this->getUser();
+
+        $responseData = $this->serializer->serialize($user, 'json');
+
+        return new JsonResponse($responseData, Response::HTTP_OK, [], true);
+    }
+
+    #[Route('/account/edit', name: 'edit', methods: 'PUT')]
+    /** @OA\Put(
+     *     path="/api/account/edit",
+     *     summary="Modifier son compte utilisateur avec l'un ou tous les champs",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Nouvelles données éventuelles de l'utilisateur à mettre à jour",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="firstName", type="string", example="Nouveau prénom"),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=204,
+     *         description="Utilisateur modifié avec succès"
+     *     )
+     * )
+     */
+    public function edit(Request $request): JsonResponse
+    {
+        $user = $this->serializer->deserialize(
+            $request->getContent(),
+            User::class,
+            'json',
+            [AbstractNormalizer::OBJECT_TO_POPULATE => $this->getUser()],
+        );
+        $user->setUpdatedAt(new DateTimeImmutable());
+
+        if (isset($request->toArray()['password'])) {
+            $user->setPassword($this->passwordHasher->hashPassword($user, $user->getPassword()));
+        }
+
+        $this->manager->flush();
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//  Méthode pour lister les utilisateurs
+    #[Route('/users', name: 'list_users', methods:['GET'])]
+    #[OA\Get(
+        path: "/api/users",
+        summary: "Obtenir la liste des utilisateurs",
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Liste des utilisateurs",
+                content: new OA\JsonContent(
+                    type: "array",
+                    items: new OA\Items(
+                        type: "object",
+                        properties: [
+                            new OA\Property(property: "id", type: "integer", example: 1),
+                            new OA\Property(property: "email", type: "string", example: "adresse@email.com"),
+                            new OA\Property(property: "roles", type: "array", items: new OA\Items(type: "string", example: "ROLE_USER"))
+                        ]
+                    )
+                )
+            )
+        ]
+    )]
+    public function listUsers(): JsonResponse
+    {
+        // Récupération des utilisateurs depuis la base de données
+        $users = $this->manager->getRepository(User::class)->findAll();
+
+        // Vérifiez que les utilisateurs sont bien récupérés
+        if (empty($users)) {
+            return new JsonResponse(['message' => 'Aucun utilisateur trouvé'], Response::HTTP_NOT_FOUND);
+        }
+
+        // Sérialisation des utilisateurs avec le groupe 'user:read'
+        $data = $this->serializer->serialize($users, 'json', ['groups' => 'user:read']);
+
+        return new JsonResponse($data, Response::HTTP_OK, ['Content-Type' => 'application/json'], true);
+    }
+
 }
-
-
-
-
