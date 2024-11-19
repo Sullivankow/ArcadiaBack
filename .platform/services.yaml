@@ -1,3 +1,0 @@
-mysqldb: 
-type: mysql:15.1
-disk: 512
