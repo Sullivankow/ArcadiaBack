@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class DefaultController extends AbstractController
 {
-    #[Route('/')]
+    #[Route('/', name:'home')]
     public function home() : Response
     {
 	return new Response('Bienvenue sur votre accueil !');
