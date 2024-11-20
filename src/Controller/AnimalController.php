@@ -20,7 +20,7 @@ use OpenApi\Attributes as OA;
 class AnimalController extends AbstractController
 {
 
-    public  function __construct(
+    public  function __construct  (
         private EntityManagerInterface $manager,
         private AnimalRepository $animalRepository,
         private SerializerInterface $serializer,
