@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Controller;
+
 use App\Entity\Image;
 use App\Repository\ImageRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -11,28 +12,22 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use OpenApi\Attributes as OA;
-
-
-
-
+use App\Repository\HabitatRepository;
 
 #[Route('api/image', name: 'app_api_image')]
 class ImageController extends AbstractController
 {
-
     public function __construct(
         private EntityManagerInterface $manager,
         private ImageRepository $imageRepository,
         private SerializerInterface $serializer,
         private UrlGeneratorInterface $urlGenerator,
+        private HabitatRepository $habitatRepository,
     ) {
-
     }
 
-
-    //METHODE POST
+    // Méthode POST pour ajouter une image
     #[Route(methods: ['POST'])]
-
     #[OA\Post(
         summary: "Ajouter une nouvelle image",
         requestBody: new OA\RequestBody(
@@ -40,85 +35,71 @@ class ImageController extends AbstractController
             content: new OA\JsonContent(
                 type: "object",
                 properties: [
-                    new OA\Property(property: "image_data", type: "blob", example: "image de l'habitat"),
-                    
-
+                    new OA\Property(property: "image_data", type: "string", example: "aquatique-habitat.jpg"),
+                    new OA\Property(property: "habitat_id", type: "integer", example: 3)
                 ]
             )
         ),
-        responses: [  // Utilisation correcte de 'responses' ici
+        responses: [
             new OA\Response(
                 response: 201,
-                description: "Image ajoutée avec succès", // Correction du message
+                description: "Image ajoutée avec succès",
                 content: new OA\JsonContent(
                     type: "object",
                     properties: [
                         new OA\Property(property: "id", type: "integer", example: 1),
-                        new OA\Property(property: "image_data", type: "blob", example: "image de l'habitat"),
-                        
-
+                        new OA\Property(property: "image_data", type: "string", example: "aquatique-habitat.jpg"),
                     ]
                 )
             ),
             new OA\Response(
                 response: 404,
-                description: "Image non trouvé" // Correction du message
+                description: "Image non trouvée"
             )
         ]
     )]
-
-
-
-
-
-
-
-
     public function new(Request $request): JsonResponse
     {
-        //Création d'un objet utilisateur static en dur avec de fausses données pour tester l'api
-// $utilisateur = new Utilisateur();
-// $utilisateur->setUsername('testcrud@mail.com');
-// $utilisateur->setPassword('Azerty_123');
-// $utilisateur->setNom('koko');
-// $utilisateur->setPrenom('jean');
+        // Récupérer le contenu JSON
+        $data = json_decode($request->getContent(), true);
 
+        // Vérifier si les données nécessaires sont présentes
+        if (!isset($data['image_data']) || !isset($data['habitat_id'])) {
+            return new JsonResponse(['error' => 'Les champs "image_data" et "habitat_id" sont requis'], Response::HTTP_BAD_REQUEST);
+        }
 
-        //Serialiszer transforme un format en un autre format
-        $image = $this->serializer->deserialize($request->getContent(), Image::class, 'json');
+        // Trouver l'habitat correspondant à l'ID
+        $habitat = $this->habitatRepository->find($data['habitat_id']);
+        if (!$habitat) {
+            return new JsonResponse(['error' => 'Habitat non trouvé'], Response::HTTP_NOT_FOUND);
+        }
 
+        // Créer une nouvelle entité Image
+        $image = new Image();
+        // Si 'image_data' est un chemin de fichier, tu l'associes à image_path
+        $image->setImagePath($data['image_data']);  // Enregistrer le chemin du fichier dans image_path
+        $image->setHabitat($habitat); // Associer l'habitat à l'image
 
-
-
-        //On met l'objet sur liste d'attente avec persist puis on le push avec flush
+        // Persister et enregistrer l'image en base de données
         $this->manager->persist($image);
         $this->manager->flush();
 
-
+        // Sérialiser l'image pour la réponse JSON
         $responseData = $this->serializer->serialize($image, 'json');
 
+        // Créer l'URL pour l'image (optionnel)
         $location = $this->urlGenerator->generate(
-
             'app_api_imageshow',
-
             ['id' => $image->getId()],
-
-            UrlGeneratorInterface::ABSOLUTE_URL,
+            UrlGeneratorInterface::ABSOLUTE_URL
         );
 
-
-
-        //à stocker en bdd
+        // Retourner la réponse JSON avec l'image ajoutée et son URL
         return new JsonResponse($responseData, Response::HTTP_CREATED, ["Location" => $location], true);
-
     }
 
-
-
-    //METHODE GET
-
+    // Méthode GET pour afficher une image
     #[Route('/{id}', 'show', methods: ['GET'])]
-
     #[OA\Get(
         summary: "Afficher l'image",
         parameters: [
@@ -139,8 +120,6 @@ class ImageController extends AbstractController
                     properties: [
                         new OA\Property(property: "id", type: "integer", example: 1),
                         new OA\Property(property: "image_data", type: "blob", example: "Image de l'habitat"),
-                        
-
                     ]
                 )
             ),
@@ -150,32 +129,18 @@ class ImageController extends AbstractController
             )
         ]
     )]
-
-
-
-
-
-
-
     public function show(int $id): Response
     {
         $image = $this->imageRepository->findOneBy(['id' => $id]);
-        // $utilisateur = Chercher utilisateur avec l'id = 1
         if ($image) {
             $responseData = $this->serializer->serialize($image, 'json');
             return new JsonResponse($responseData, Response::HTTP_OK, [], true);
         }
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
-
     }
 
-
-
-
-    //METHODE PUT
+    // Méthode PUT pour modifier une image
     #[Route('/{id}', name: 'edit', methods: ['PUT'])]
-
-
     #[OA\Put(
         summary: "Modifier l'image",
         parameters: [
@@ -193,8 +158,6 @@ class ImageController extends AbstractController
                 type: "object",
                 properties: [
                     new OA\Property(property: "image_data", type: "blob", example: "Image de l'habitat"),
-                    
-
                 ]
             )
         ),
@@ -209,20 +172,13 @@ class ImageController extends AbstractController
             )
         ]
     )]
-
-
-
-
-
-
-
-
     public function edit(int $id, Request $request): JsonResponse
     {
         $image = $this->imageRepository->findOneBy(['id' => $id]);
 
-
         if ($image) {
+            // Désérialiser les données de la requête
+            $data = json_decode($request->getContent(), true);
             $image = $this->serializer->deserialize(
                 $request->getContent(),
                 Image::class,
@@ -230,22 +186,20 @@ class ImageController extends AbstractController
                 [AbstractNormalizer::OBJECT_TO_POPULATE => $image]
             );
 
+            // Si 'image_data' a changé, on met à jour 'image_path'
+            if (isset($data['image_data'])) {
+                $image->setImagePath($data['image_data']);
+            }
+
+            // Sauvegarder les modifications
             $this->manager->flush();
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);
         }
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
-
     }
 
-
-
-
-    //METHODE DELETE
-
+    // Méthode DELETE pour supprimer une image
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
-
-
-
     #[OA\Delete(
         summary: "Supprimer une image",
         parameters: [
@@ -268,21 +222,15 @@ class ImageController extends AbstractController
             )
         ]
     )]
-
-
-
-
     public function delete(int $id): Response
     {
-
         $image = $this->imageRepository->findOneBy(['id' => $id]);
-        // $utilisateur = Chercher utilisateur avec l'id = 1
         if (!$image) {
-            throw new \Exception("no picture found for {$id} id");
+            throw new \Exception("Aucune image trouvée pour l'ID {$id}");
         }
 
-        $this->manager->remove($image); //S'il ne trouve pas, il supprime l'information
+        $this->manager->remove($image);
         $this->manager->flush();
-        return $this->json(['Message' => 'picture resource deleted'], Response::HTTP_NO_CONTENT);
+        return $this->json(['Message' => 'Image supprimée avec succès'], Response::HTTP_NO_CONTENT);
     }
 }

@@ -3,11 +3,13 @@
 namespace App\Entity;
 
 use App\Repository\HabitatRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Animal;
 use App\Entity\Image;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: HabitatRepository::class)]
 class Habitat
@@ -18,30 +20,32 @@ class Habitat
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['habitat:read', 'habitat:create'])] // Ajout du groupe 'habitat:read' pour la sérialisation
     private ?string $nom = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 155)]
+    #[Groups(['habitat:read', 'habitat:create'])]
     private ?string $description = null;
 
-    #[ORM\Column(length: 150, nullable: true)]
+    #[ORM\Column(length: 155, nullable: true)]
+    #[Groups(['habitat:read', 'habitat:create'])]
     private ?string $commentaire_habitat = null;
 
     /**
      * @var Collection<int, Animal>
      */
     #[ORM\OneToMany(targetEntity: Animal::class, mappedBy: 'habitat')]
+    #[Groups(['habitat:read'])] // Utilisation du groupe pour les animaux
     private Collection $animals;
 
-    /**
-     * @var Collection<int, Image>
-     */
-    #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'habitat')]
-    private Collection $images;
+    #[ORM\OneToOne(targetEntity: Image::class, inversedBy: 'habitat', cascade: ['persist', 'remove'])]
+    #[Groups(['habitat:read'])]
+    #[MaxDepth(1)] // Limiter la profondeur de la sérialisation
+    private ?Image $image = null;
 
     public function __construct()
     {
         $this->animals = new ArrayCollection();
-        $this->images = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -115,32 +119,15 @@ class Habitat
         return $this;
     }
 
-    /**
-     * @return Collection<int, Image>
-     */
-    public function getImages(): Collection
+    // Getter et Setter pour l'image
+    public function getImage(): ?Image
     {
-        return $this->images;
+        return $this->image;
     }
 
-    public function addImage(Image $image): static
+    public function setImage(?Image $image): static
     {
-        if (!$this->images->contains($image)) {
-            $this->images->add($image);
-            $image->setHabitat($this);
-        }
-
-        return $this;
-    }
-
-    public function removeImage(Image $image): static
-    {
-        if ($this->images->removeElement($image)) {
-            // set the owning side to null (unless already changed)
-            if ($image->getHabitat() === $this) {
-                $image->setHabitat(null);
-            }
-        }
+        $this->image = $image;
 
         return $this;
     }

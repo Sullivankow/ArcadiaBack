@@ -6,6 +6,8 @@ use App\Repository\ImageRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Habitat;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: ImageRepository::class)]
 class Image
@@ -18,7 +20,12 @@ class Image
     #[ORM\Column(type: Types::BLOB, nullable: true)]
     private $image_data;
 
-    #[ORM\ManyToOne(inversedBy: 'images')]
+    #[ORM\Column(type: "string", nullable: true)]
+    private ?string $imagePath = null;
+
+    #[ORM\OneToOne(mappedBy: 'image', cascade: ['persist', 'remove'])]
+    #[Groups(['image:read', 'image:create'])]
+    #[MaxDepth(1)] // Limiter la profondeur de sérialisation
     private ?Habitat $habitat = null;
 
     public function getId(): ?int
@@ -38,6 +45,19 @@ class Image
         return $this;
     }
 
+    public function getImagePath(): ?string
+    {
+        return $this->imagePath;
+    }
+
+    public function setImagePath(?string $imagePath): static
+    {
+        $this->imagePath = $imagePath;
+
+        return $this;
+    }
+
+    // Sérialisation de habitat uniquement dans certains cas
     public function getHabitat(): ?Habitat
     {
         return $this->habitat;

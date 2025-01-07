@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Controller;
+
 use App\Entity\Habitat;
 use App\Repository\HabitatRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -12,27 +13,19 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use OpenApi\Attributes as OA;
 
-
-
-
-
 #[Route('api/habitat', name: 'app_api_habitat')]
 class HabitatController extends AbstractController
 {
-
     public function __construct(
         private EntityManagerInterface $manager,
         private HabitatRepository $habitatRepository,
         private SerializerInterface $serializer,
-        private UrlGeneratorInterface $urlGenerator,
+        private UrlGeneratorInterface $urlGenerator
     ) {
-
     }
 
-
-    //METHODE POST
+    // METHODE POST
     #[Route(methods: ['POST'])]
-
     #[OA\Post(
         summary: "Créer un nouvel habitat",
         requestBody: new OA\RequestBody(
@@ -46,10 +39,10 @@ class HabitatController extends AbstractController
                 ]
             )
         ),
-        responses: [  // Utilisation correcte de 'responses' ici
+        responses: [
             new OA\Response(
                 response: 201,
-                description: "Habitat créé avec succès", // Correction du message
+                description: "Habitat créé avec succès",
                 content: new OA\JsonContent(
                     type: "object",
                     properties: [
@@ -60,65 +53,33 @@ class HabitatController extends AbstractController
                     ]
                 )
             ),
-            new OA\Response(
-                response: 404,
-                description: "Habitat non trouvé" // Correction du message
-            )
+            new OA\Response(response: 400, description: "Données invalides")
         ]
     )]
-
-
-
-
-
-
-
-
-      public function new(Request $request): JsonResponse
+    public function new(Request $request): JsonResponse
     {
-        //Création d'un objet utilisateur static en dur avecc de fausses données pour tester l'api
-// $utilisateur = new Utilisateur();
-// $utilisateur->setUsername('testcrud@mail.com');
-// $utilisateur->setPassword('Azerty_123');
-// $utilisateur->setNom('koko');
-// $utilisateur->setPrenom('jean');
+        $habitat = $this->serializer->deserialize($request->getContent(), Habitat::class, 'json', [
+            AbstractNormalizer::GROUPS => ['habitat:write'],
+        ]);
 
-
-        //Serialiszer transforme un format en un autre format
-        $habitat = $this->serializer->deserialize($request->getContent(), Habitat::class, 'json');
-
-
-
-
-        //On met l'objet sur liste d'attente avec persist puis on le push avec flush
         $this->manager->persist($habitat);
         $this->manager->flush();
 
-
-        $responseData = $this->serializer->serialize($habitat, 'json');
+        $responseData = $this->serializer->serialize($habitat, 'json', [
+            AbstractNormalizer::GROUPS => ['habitat:read'],
+        ]);
 
         $location = $this->urlGenerator->generate(
-
             'app_api_habitatshow',
-
             ['id' => $habitat->getId()],
-
-            UrlGeneratorInterface::ABSOLUTE_URL,
+            UrlGeneratorInterface::ABSOLUTE_URL
         );
 
-
-
-        //à stocker en bdd
         return new JsonResponse($responseData, Response::HTTP_CREATED, ["Location" => $location], true);
-
     }
 
-
-
-    //METHODE GET
-
+    // METHODE GET
     #[Route('/{id}', 'show', methods: ['GET'])]
-
     #[OA\Get(
         summary: "Afficher habitat",
         parameters: [
@@ -140,43 +101,29 @@ class HabitatController extends AbstractController
                         new OA\Property(property: "id", type: "integer", example: 1),
                         new OA\Property(property: "nom", type: "string", example: "Nom de l'habitat"),
                         new OA\Property(property: "description", type: "string", example: "Description de l'habitat"),
-                        new OA\Property(property: "commentaire_habitat", type: "string", example: "Commentaire sur l'habitat"),
-                        
+                        new OA\Property(property: "commentaire_habitat", type: "string", example: "Commentaire sur l'habitat")
                     ]
                 )
             ),
-            new OA\Response(
-                response: 404,
-                description: "Habitat non trouvé"
-            )
+            new OA\Response(response: 404, description: "Habitat non trouvé")
         ]
     )]
-
-
-
-
-
-
-
     public function show(int $id): Response
     {
-        $habitat = $this->habitatRepository->findOneBy(['id' => $id]);
-        // $utilisateur = Chercher utilisateur avec l'id = 1
+        $habitat = $this->habitatRepository->find($id);
+
         if ($habitat) {
-            $responseData = $this->serializer->serialize($habitat, 'json');
+            $responseData = $this->serializer->serialize($habitat, 'json', [
+                AbstractNormalizer::GROUPS => ['habitat:read'],
+            ]);
             return new JsonResponse($responseData, Response::HTTP_OK, [], true);
         }
-        return new JsonResponse(null, Response::HTTP_NOT_FOUND);
 
+        return new JsonResponse(['message' => 'Habitat non trouvé'], Response::HTTP_NOT_FOUND);
     }
 
-
-
-
-    //METHODE PUT
+    // METHODE PUT
     #[Route('/{id}', name: 'edit', methods: ['PUT'])]
-
-
     #[OA\Put(
         summary: "Modifier habitat",
         parameters: [
@@ -195,58 +142,36 @@ class HabitatController extends AbstractController
                 properties: [
                     new OA\Property(property: "nom", type: "string", example: "Nom de l'habitat"),
                     new OA\Property(property: "description", type: "string", example: "Description de l'habitat"),
-                    new OA\Property(property: "commentaire", type: "string", example: "Commentaire sur l'habitat")
+                    new OA\Property(property: "commentaire_habitat", type: "string", example: "Commentaire sur l'habitat")
                 ]
             )
         ),
         responses: [
-            new OA\Response(
-                response: 200,
-                description: "Habitat modifié avec succès"
-            ),
-            new OA\Response(
-                response: 404,
-                description: "Habitat non trouvé"
-            )
+            new OA\Response(response: 200, description: "Habitat modifié avec succès"),
+            new OA\Response(response: 404, description: "Habitat non trouvé")
         ]
     )]
-
-
-
-
-
-
-
-
     public function edit(int $id, Request $request): JsonResponse
     {
-        $habitat = $this->habitatRepository->findOneBy(['id' => $id]);
-
+        $habitat = $this->habitatRepository->find($id);
 
         if ($habitat) {
-            $habitat = $this->serializer->deserialize(
+            $this->serializer->deserialize(
                 $request->getContent(),
                 Habitat::class,
                 'json',
-                [AbstractNormalizer::OBJECT_TO_POPULATE => $habitat]
+                [AbstractNormalizer::OBJECT_TO_POPULATE => $habitat, AbstractNormalizer::GROUPS => ['habitat:write']]
             );
 
             $this->manager->flush();
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);
         }
-        return new JsonResponse(null, Response::HTTP_NOT_FOUND);
 
+        return new JsonResponse(['message' => 'Habitat non trouvé'], Response::HTTP_NOT_FOUND);
     }
 
-
-
-
-    //METHODE DELETE
-
+    // METHODE DELETE
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
-
-
-
     #[OA\Delete(
         summary: "Supprimer un habitat",
         parameters: [
@@ -259,33 +184,24 @@ class HabitatController extends AbstractController
             )
         ],
         responses: [
-            new OA\Response(
-                response: 204,
-                description: "Habitat supprimé avec succès"
-            ),
-            new OA\Response(
-                response: 404,
-                description: "Habitat non trouvé"
-            )
+            new OA\Response(response: 204, description: "Habitat supprimé avec succès"),
+            new OA\Response(response: 404, description: "Habitat non trouvé")
         ]
     )]
-
-
-
-
     public function delete(int $id): Response
     {
+        $habitat = $this->habitatRepository->find($id);
 
-        $habitat = $this->habitatRepository->findOneBy(['id' => $id]);
-        // $utilisateur = Chercher utilisateur avec l'id = 1
         if (!$habitat) {
-            throw new \Exception("no habitat found for {$id} id");
+            return new JsonResponse(['message' => 'Habitat non trouvé'], Response::HTTP_NOT_FOUND);
         }
 
-        $this->manager->remove($habitat); //S'il ne trouve pas, il supprime l'information
+        $this->manager->remove($habitat);
         $this->manager->flush();
-        return $this->json(['Message' => 'habitat resource deleted'], Response::HTTP_NO_CONTENT);
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }
+
 
 
