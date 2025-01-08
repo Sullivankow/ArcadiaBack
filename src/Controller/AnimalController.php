@@ -20,7 +20,7 @@ use OpenApi\Attributes as OA;
 class AnimalController extends AbstractController
 {
 
-    public  function __construct  (
+    public function __construct(
         private EntityManagerInterface $manager,
         private AnimalRepository $animalRepository,
         private SerializerInterface $serializer,
@@ -42,7 +42,7 @@ class AnimalController extends AbstractController
                 properties: [
                     new OA\Property(property: "prenom", type: "string", example: "Prénom de l'animal"),
                     new OA\Property(property: "etat", type: "string", example: "état de l'animal"),
-                   
+
                 ]
             )
         ),
@@ -56,7 +56,7 @@ class AnimalController extends AbstractController
                         new OA\Property(property: "id", type: "integer", example: 1),
                         new OA\Property(property: "prenom", type: "string", example: "Prénom de l'animal"),
                         new OA\Property(property: "etat", type: "string", example: "état de l'animal"),
-                        
+
                     ]
                 )
             ),
@@ -76,12 +76,7 @@ class AnimalController extends AbstractController
 
     public function new(Request $request): JsonResponse
     {
-        //Création d'un objet utilisateur static en dur avec de fausses données pour tester l'api
-// $utilisateur = new Utilisateur();
-// $utilisateur->setUsername('testcrud@mail.com');
-// $utilisateur->setPassword('Azerty_123');
-// $utilisateur->setNom('koko');
-// $utilisateur->setPrenom('jean');
+
 
 
         //Serialiszer transforme un format en un autre format
@@ -194,7 +189,7 @@ class AnimalController extends AbstractController
                 properties: [
                     new OA\Property(property: "prenom", type: "string", example: "Prénom de l'animal"),
                     new OA\Property(property: "etat", type: "string", example: "état de l'animal"),
-                    
+
                 ]
             )
         ),

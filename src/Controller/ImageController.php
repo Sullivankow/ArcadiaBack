@@ -54,7 +54,11 @@ class ImageController extends AbstractController
             ),
             new OA\Response(
                 response: 404,
-                description: "Image non trouvée"
+                description: "Habitat non trouvé"
+            ),
+            new OA\Response(
+                response: 400,
+                description: "Requête invalide"
             )
         ]
     )]
@@ -76,20 +80,20 @@ class ImageController extends AbstractController
 
         // Créer une nouvelle entité Image
         $image = new Image();
-        // Si 'image_data' est un chemin de fichier, tu l'associes à image_path
         $image->setImagePath($data['image_data']);  // Enregistrer le chemin du fichier dans image_path
         $image->setHabitat($habitat); // Associer l'habitat à l'image
 
         // Persister et enregistrer l'image en base de données
         $this->manager->persist($image);
+        $this->manager->persist($habitat);
         $this->manager->flush();
 
         // Sérialiser l'image pour la réponse JSON
         $responseData = $this->serializer->serialize($image, 'json');
 
-        // Créer l'URL pour l'image (optionnel)
+        // Créer l'URL pour l'image
         $location = $this->urlGenerator->generate(
-            'app_api_imageshow',
+            'app_api_imageshow',  // Remarquez que la route pour l'image doit être définie correctement dans la méthode GET
             ['id' => $image->getId()],
             UrlGeneratorInterface::ABSOLUTE_URL
         );
@@ -119,7 +123,7 @@ class ImageController extends AbstractController
                     type: "object",
                     properties: [
                         new OA\Property(property: "id", type: "integer", example: 1),
-                        new OA\Property(property: "image_data", type: "blob", example: "Image de l'habitat"),
+                        new OA\Property(property: "image_data", type: "string", example: "aquatique-habitat.jpg"),
                     ]
                 )
             ),
@@ -157,18 +161,18 @@ class ImageController extends AbstractController
             content: new OA\JsonContent(
                 type: "object",
                 properties: [
-                    new OA\Property(property: "image_data", type: "blob", example: "Image de l'habitat"),
+                    new OA\Property(property: "image_data", type: "string", example: "nouvelle-image.jpg"),
                 ]
             )
         ),
         responses: [
             new OA\Response(
                 response: 200,
-                description: "Image modifié avec succès"
+                description: "Image modifiée avec succès"
             ),
             new OA\Response(
                 response: 404,
-                description: "Image non trouvé"
+                description: "Image non trouvée"
             )
         ]
     )]
@@ -214,11 +218,11 @@ class ImageController extends AbstractController
         responses: [
             new OA\Response(
                 response: 204,
-                description: "Image supprimé avec succès"
+                description: "Image supprimée avec succès"
             ),
             new OA\Response(
                 response: 404,
-                description: "Image non trouvé"
+                description: "Image non trouvée"
             )
         ]
     )]
@@ -226,11 +230,12 @@ class ImageController extends AbstractController
     {
         $image = $this->imageRepository->findOneBy(['id' => $id]);
         if (!$image) {
-            throw new \Exception("Aucune image trouvée pour l'ID {$id}");
+            return new JsonResponse(['error' => "Aucune image trouvée pour l'ID {$id}"], Response::HTTP_NOT_FOUND);
         }
 
         $this->manager->remove($image);
         $this->manager->flush();
-        return $this->json(['Message' => 'Image supprimée avec succès'], Response::HTTP_NO_CONTENT);
+        return new JsonResponse(['message' => 'Image supprimée avec succès'], Response::HTTP_NO_CONTENT);
     }
 }
+

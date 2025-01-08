@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Habitat;
+use App\Entity\Image;  // Assurez-vous d'importer l'entité Image
 use App\Repository\HabitatRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,7 +25,7 @@ class HabitatController extends AbstractController
     ) {
     }
 
-    // METHODE POST
+    // METHODE POST - Créer un nouvel habitat
     #[Route(methods: ['POST'])]
     #[OA\Post(
         summary: "Créer un nouvel habitat",
@@ -35,7 +36,8 @@ class HabitatController extends AbstractController
                 properties: [
                     new OA\Property(property: "nom", type: "string", example: "Nom de l'habitat"),
                     new OA\Property(property: "description", type: "string", example: "Description de l'habitat"),
-                    new OA\Property(property: "commentaire_habitat", type: "string", example: "Commentaire sur l'habitat")
+                    new OA\Property(property: "commentaire_habitat", type: "string", example: "Commentaire sur l'habitat"),
+                    new OA\Property(property: "image_id", type: "integer", example: 1)  // Ajout du champ image_id
                 ]
             )
         ),
@@ -49,7 +51,7 @@ class HabitatController extends AbstractController
                         new OA\Property(property: "id", type: "integer", example: 1),
                         new OA\Property(property: "nom", type: "string", example: "Nom de l'habitat"),
                         new OA\Property(property: "description", type: "string", example: "Description de l'habitat"),
-                        new OA\Property(property: "commentaire_habitat", type: "string", format: "Commentaire sur l'habitat")
+                        new OA\Property(property: "commentaire_habitat", type: "string", example: "Commentaire sur l'habitat")
                     ]
                 )
             ),
@@ -58,27 +60,44 @@ class HabitatController extends AbstractController
     )]
     public function new(Request $request): JsonResponse
     {
+        // Décoder le contenu de la requête
+        $data = json_decode($request->getContent(), true);
+
+        // Désérialiser les données de l'habitat
         $habitat = $this->serializer->deserialize($request->getContent(), Habitat::class, 'json', [
             AbstractNormalizer::GROUPS => ['habitat:write'],
         ]);
 
+        // Si un image_id est fourni, récupérer l'image correspondante
+        if (isset($data['image_id'])) {
+            $image = $this->manager->getRepository(Image::class)->find($data['image_id']);
+
+            if ($image) {
+                $habitat->setImage($image);  // Associer l'image à l'habitat
+            }
+        }
+
+        // Persister l'habitat
         $this->manager->persist($habitat);
         $this->manager->flush();
 
+        // Sérialiser la réponse
         $responseData = $this->serializer->serialize($habitat, 'json', [
             AbstractNormalizer::GROUPS => ['habitat:read'],
         ]);
 
+        // Générer l'URL de l'habitat créé
         $location = $this->urlGenerator->generate(
             'app_api_habitatshow',
             ['id' => $habitat->getId()],
             UrlGeneratorInterface::ABSOLUTE_URL
         );
 
+        // Retourner la réponse JSON avec Location dans l'en-tête
         return new JsonResponse($responseData, Response::HTTP_CREATED, ["Location" => $location], true);
     }
 
-    // METHODE GET
+    // METHODE GET - Afficher habitat par ID
     #[Route('/{id}', 'show', methods: ['GET'])]
     #[OA\Get(
         summary: "Afficher habitat",
@@ -122,7 +141,7 @@ class HabitatController extends AbstractController
         return new JsonResponse(['message' => 'Habitat non trouvé'], Response::HTTP_NOT_FOUND);
     }
 
-    // METHODE PUT
+    // METHODE PUT - Modifier habitat
     #[Route('/{id}', name: 'edit', methods: ['PUT'])]
     #[OA\Put(
         summary: "Modifier habitat",
@@ -170,7 +189,7 @@ class HabitatController extends AbstractController
         return new JsonResponse(['message' => 'Habitat non trouvé'], Response::HTTP_NOT_FOUND);
     }
 
-    // METHODE DELETE
+    // METHODE DELETE - Supprimer habitat
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
     #[OA\Delete(
         summary: "Supprimer un habitat",

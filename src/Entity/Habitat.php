@@ -40,6 +40,7 @@ class Habitat
 
     #[ORM\OneToOne(targetEntity: Image::class, inversedBy: 'habitat', cascade: ['persist', 'remove'])]
     #[Groups(['habitat:read'])]
+    #[ORM\JoinColumn(name: 'image_id', referencedColumnName: 'id', nullable: true)]
     #[MaxDepth(1)] // Limiter la profondeur de la sérialisation
     private ?Image $image = null;
 
