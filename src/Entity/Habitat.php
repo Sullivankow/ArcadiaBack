@@ -3,11 +3,9 @@
 namespace App\Entity;
 
 use App\Repository\HabitatRepository;
-use Doctrine\ORM\Mapping as ORM;
-use App\Entity\Animal;
-use App\Entity\Image;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Annotation\MaxDepth;
 
@@ -20,33 +18,31 @@ class Habitat
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['habitat:read', 'habitat:create'])] // Ajout du groupe 'habitat:read' pour la sérialisation
+    #[Groups(['habitat:read', 'habitat:create'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 155)]
     #[Groups(['habitat:read', 'habitat:create'])]
     private ?string $description = null;
 
-    #[ORM\Column(length: 155, nullable: true)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['habitat:read', 'habitat:create'])]
     private ?string $commentaire_habitat = null;
 
-    /**
-     * @var Collection<int, Animal>
-     */
     #[ORM\OneToMany(targetEntity: Animal::class, mappedBy: 'habitat')]
-    #[Groups(['habitat:read'])] // Utilisation du groupe pour les animaux
+    #[Groups(['habitat:read'])]
     private Collection $animals;
 
-    #[ORM\OneToOne(targetEntity: Image::class, inversedBy: 'habitat', cascade: ['persist', 'remove'])]
+    #[ORM\ManyToMany(targetEntity: Image::class, inversedBy: 'habitats', cascade: ['persist', 'remove'])]
     #[Groups(['habitat:read'])]
-    #[ORM\JoinColumn(name: 'image_id', referencedColumnName: 'id', nullable: true)]
-    #[MaxDepth(1)] // Limiter la profondeur de la sérialisation
-    private ?Image $image = null;
+    #[ORM\JoinTable(name: 'habitat_image')]
+    #[MaxDepth(1)]
+    private Collection $images;
 
     public function __construct()
     {
         $this->animals = new ArrayCollection();
+        $this->images = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -111,7 +107,6 @@ class Habitat
     public function removeAnimal(Animal $animal): static
     {
         if ($this->animals->removeElement($animal)) {
-            // set the owning side to null (unless already changed)
             if ($animal->getHabitat() === $this) {
                 $animal->setHabitat(null);
             }
@@ -120,15 +115,26 @@ class Habitat
         return $this;
     }
 
-    // Getter et Setter pour l'image
-    public function getImage(): ?Image
+    public function getImages(): Collection
     {
-        return $this->image;
+        return $this->images;
     }
 
-    public function setImage(?Image $image): static
+    public function addImage(Image $image): static
     {
-        $this->image = $image;
+        if (!$this->images->contains($image)) {
+            $this->images[] = $image;
+            $image->addHabitat($this);
+        }
+
+        return $this;
+    }
+
+    public function removeImage(Image $image): static
+    {
+        if ($this->images->removeElement($image)) {
+            $image->removeHabitat($this);
+        }
 
         return $this;
     }

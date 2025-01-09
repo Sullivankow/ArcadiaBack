@@ -3,9 +3,10 @@
 namespace App\Entity;
 
 use App\Repository\ImageRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use App\Entity\Habitat;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Annotation\MaxDepth;
 
@@ -23,10 +24,15 @@ class Image
     #[ORM\Column(type: "string", nullable: true)]
     private ?string $imagePath = null;
 
-    #[ORM\OneToOne(mappedBy: 'image', cascade: ['persist', 'remove'])]
+    #[ORM\ManyToMany(targetEntity: Habitat::class, mappedBy: 'images')]
     #[Groups(['image:read', 'image:create'])]
-    #[MaxDepth(1)] // Limiter la profondeur de sérialisation
-    private ?Habitat $habitat = null;
+    #[MaxDepth(1)]
+    private Collection $habitats;
+
+    public function __construct()
+    {
+        $this->habitats = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -57,15 +63,26 @@ class Image
         return $this;
     }
 
-    // Sérialisation de habitat uniquement dans certains cas
-    public function getHabitat(): ?Habitat
+    public function getHabitats(): Collection
     {
-        return $this->habitat;
+        return $this->habitats;
     }
 
-    public function setHabitat(?Habitat $habitat): static
+    public function addHabitat(Habitat $habitat): static
     {
-        $this->habitat = $habitat;
+        if (!$this->habitats->contains($habitat)) {
+            $this->habitats[] = $habitat;
+            $habitat->addImage($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHabitat(Habitat $habitat): static
+    {
+        if ($this->habitats->removeElement($habitat)) {
+            $habitat->removeImage($this);
+        }
 
         return $this;
     }
