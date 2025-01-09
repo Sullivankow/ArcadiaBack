@@ -6,7 +6,7 @@ use App\Entity\Image;
 use App\Repository\ImageRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\{JsonResponse, Request, Response};
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -81,29 +81,28 @@ class ImageController extends AbstractController
         // Créer une nouvelle entité Image
         $image = new Image();
         $image->setImagePath($data['image_data']);  // Enregistrer le chemin du fichier dans image_path
-        $image->setHabitat($habitat); // Associer l'habitat à l'image
+        $image->addHabitat($habitat); // Utiliser addHabitat() pour lier l'habitat à l'image
 
         // Persister et enregistrer l'image en base de données
         $this->manager->persist($image);
-        $this->manager->persist($habitat);
-        $this->manager->flush();
+        $this->manager->flush(); //  pas besoin de persister l'habitat, il est déjà géré dans la relation ManyToMany
 
         // Sérialiser l'image pour la réponse JSON
         $responseData = $this->serializer->serialize($image, 'json');
 
         // Créer l'URL pour l'image
         $location = $this->urlGenerator->generate(
-            'app_api_imageshow',  // Remarquez que la route pour l'image doit être définie correctement dans la méthode GET
+            'app_api_imageshow',  //  la route pour l'image doit être définie correctement dans la méthode GET
             ['id' => $image->getId()],
             UrlGeneratorInterface::ABSOLUTE_URL
         );
 
-        // Retourner la réponse JSON avec l'image ajoutée et son URL
+        // Retourne la réponse JSON avec l'image ajoutée et son URL
         return new JsonResponse($responseData, Response::HTTP_CREATED, ["Location" => $location], true);
     }
 
     // Méthode GET pour afficher une image
-    #[Route('/{id}', 'show', methods: ['GET'])]
+    #[Route('/{id}', name: 'show', methods: ['GET'])]
     #[OA\Get(
         summary: "Afficher l'image",
         parameters: [
@@ -118,7 +117,7 @@ class ImageController extends AbstractController
         responses: [
             new OA\Response(
                 response: 200,
-                description: "Image trouvé avec succès",
+                description: "Image trouvée avec succès",
                 content: new OA\JsonContent(
                     type: "object",
                     properties: [
@@ -129,7 +128,7 @@ class ImageController extends AbstractController
             ),
             new OA\Response(
                 response: 404,
-                description: "Image non trouvé"
+                description: "Image non trouvée"
             )
         ]
     )]
@@ -238,4 +237,5 @@ class ImageController extends AbstractController
         return new JsonResponse(['message' => 'Image supprimée avec succès'], Response::HTTP_NO_CONTENT);
     }
 }
+
 
