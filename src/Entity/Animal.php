@@ -6,6 +6,8 @@ use App\Repository\AnimalRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: AnimalRepository::class)]
 class Animal
@@ -16,21 +18,29 @@ class Animal
     private ?int $id = null;
 
     #[ORM\Column(length: 50, nullable: true)]
+    #[Groups(["animal:read", "animal:write"])]  // Spécifie les groupes de sérialisation
     private ?string $prenom = null;
 
     #[ORM\Column(length: 50, nullable: true)]
+    #[Groups(["animal:read", "animal:write"])]
     private ?string $etat = null;
 
     /**
      * @var Collection<int, RapportVeterinaire>
      */
     #[ORM\OneToMany(targetEntity: RapportVeterinaire::class, mappedBy: 'animal')]
+    #[Groups(["animal:read"])]  // Ne pas sérialiser les rapports dans "write"
+    #[MaxDepth(1)]  // Limite la profondeur de la sérialisation pour éviter les boucles infinies
     private Collection $rapportVeterinaires;
 
     #[ORM\ManyToOne(inversedBy: 'animals')]
+    #[Groups(["animal:read", "animal:write"])]  // Sérialisation de l'habitat dans les groupes "animal:read" et "animal:write"
+    #[MaxDepth(1)]  // Limite la profondeur de la sérialisation
     private ?Habitat $habitat = null;
 
     #[ORM\ManyToOne(inversedBy: 'animals')]
+    #[Groups(["animal:read", "animal:write"])]  // Sérialisation de la race dans les groupes "animal:read" et "animal:write"
+    #[MaxDepth(1)]  // Limite la profondeur de la sérialisation
     private ?Race $race = null;
 
     public function __construct()

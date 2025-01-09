@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Habitat;
-use App\Entity\Image;  // Assurez-vous d'importer l'entité Image
+use App\Entity\Image;
 use App\Repository\HabitatRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -37,7 +37,7 @@ class HabitatController extends AbstractController
                     new OA\Property(property: "nom", type: "string", example: "Nom de l'habitat"),
                     new OA\Property(property: "description", type: "string", example: "Description de l'habitat"),
                     new OA\Property(property: "commentaire_habitat", type: "string", example: "Commentaire sur l'habitat"),
-                    new OA\Property(property: "image_id", type: "integer", example: 1)  // Ajout du champ image_id
+                    new OA\Property(property: "image_id", type: "integer", example: 1)
                 ]
             )
         ),
