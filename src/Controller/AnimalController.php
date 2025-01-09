@@ -29,7 +29,8 @@ class AnimalController extends AbstractController
     }
 
     // METHODE POST
-    #[Route(methods: ['POST'])]
+    #[Route('/new', name: 'create', methods: ['POST'])]
+
     #[OA\Post(
         summary: "Créer un nouvel animal",
         requestBody: new OA\RequestBody(
