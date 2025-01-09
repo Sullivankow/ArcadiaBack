@@ -18,15 +18,15 @@ class Habitat
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['habitat:read', 'habitat:create'])]
+    #[Groups(['habitat:read', 'habitat:create', 'habitat:write'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 155)]
-    #[Groups(['habitat:read', 'habitat:create'])]
+    #[Groups(['habitat:read', 'habitat:create', 'habitat:write'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['habitat:read', 'habitat:create'])]
+    #[Groups(['habitat:read', 'habitat:create', 'habitat:write'])]
     private ?string $commentaire_habitat = null;
 
     #[ORM\OneToMany(targetEntity: Animal::class, mappedBy: 'habitat')]
@@ -34,9 +34,9 @@ class Habitat
     private Collection $animals;
 
     #[ORM\ManyToMany(targetEntity: Image::class, inversedBy: 'habitats', cascade: ['persist', 'remove'])]
-    #[Groups(['habitat:read'])]
+    #[Groups(['habitat:read', 'habitat:write'])]
+    #[MaxDepth(1)]  // Limiter la profondeur de sérialisation pour éviter la récursion infinie
     #[ORM\JoinTable(name: 'habitat_image')]
-    #[MaxDepth(1)]
     private Collection $images;
 
     public function __construct()
@@ -139,3 +139,9 @@ class Habitat
         return $this;
     }
 }
+
+
+
+
+
+

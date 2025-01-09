@@ -5,7 +5,6 @@ namespace App\Entity;
 use App\Repository\ImageRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Annotation\MaxDepth;
@@ -18,15 +17,13 @@ class Image
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::BLOB, nullable: true)]
-    private $image_data;
-
-    #[ORM\Column(type: "string", nullable: true)]
+    #[ORM\Column(length: 255)]
+    #[Groups(['image:read', 'image:create', 'image:write'])]
     private ?string $imagePath = null;
 
     #[ORM\ManyToMany(targetEntity: Habitat::class, mappedBy: 'images')]
-    #[Groups(['image:read', 'image:create'])]
-    #[MaxDepth(1)]
+    #[Groups(['image:read'])]
+    #[MaxDepth(1)]  // Limiter la profondeur de sérialisation pour éviter la récursion infinie
     private Collection $habitats;
 
     public function __construct()
@@ -39,24 +36,12 @@ class Image
         return $this->id;
     }
 
-    public function getImageData()
-    {
-        return $this->image_data;
-    }
-
-    public function setImageData($image_data): static
-    {
-        $this->image_data = $image_data;
-
-        return $this;
-    }
-
     public function getImagePath(): ?string
     {
         return $this->imagePath;
     }
 
-    public function setImagePath(?string $imagePath): static
+    public function setImagePath(string $imagePath): static
     {
         $this->imagePath = $imagePath;
 
@@ -87,3 +72,6 @@ class Image
         return $this;
     }
 }
+
+
+
