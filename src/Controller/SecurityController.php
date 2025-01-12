@@ -26,12 +26,12 @@ use OpenApi\Attributes as OA;
 #[Route('/api', name: 'app_api_')]
 class SecurityController extends AbstractController
 {
-public function __construct(private EntityManagerInterface $manager, private SerializerInterface $serializer, private UserPasswordHasherInterface $passwordHasher, )
-{
+    public function __construct(private EntityManagerInterface $manager, private SerializerInterface $serializer, private UserPasswordHasherInterface $passwordHasher, )
+    {
 
-}
+    }
 
-    #[Route('/registration', name: 'registration', methods:['POST'])]
+    #[Route('/registration', name: 'registration', methods: ['POST'])]
 
     #[OA\Post(
         path: "/api/registration",
@@ -45,8 +45,8 @@ public function __construct(private EntityManagerInterface $manager, private Ser
                     new OA\Property(property: "email", type: "string", example: "mail@email.com"),
                     new OA\Property(property: "password", type: "string", example: "Mot de passe"),
                     new OA\Property(property: "Roles", type: "string", example: ["rôle"]),
-                  
-                    
+
+
                 ]
             )
         ),
@@ -65,7 +65,7 @@ public function __construct(private EntityManagerInterface $manager, private Ser
             )
         ]
     )]
-   
+
 
 
 
@@ -76,22 +76,22 @@ public function __construct(private EntityManagerInterface $manager, private Ser
     {
 
         $user = $this->serializer->deserialize($request->getContent(), User::class, 'json');
-        $user->setPassword ($passwordHasher->hashPassword($user, $user->getPassword()));
+        $user->setPassword($passwordHasher->hashPassword($user, $user->getPassword()));
 
-        
+
 
 
         $this->manager->persist($user);
         $this->manager->flush();
         return new JsonResponse(['user' => $user->getUserIdentifier(), 'apiToken' => $user->getApiToken(), 'roles' => $user->getRoles()], Response::HTTP_CREATED);
-    
-}
+
+    }
 
 
 
-//system d'authentification
+    //system d'authentification
 
-#[Route('/login', name: 'login', methods: ['POST'])]
+    #[Route('/login', name: 'login', methods: ['POST'])]
 
 
     #[OA\Post(
@@ -137,13 +137,12 @@ public function __construct(private EntityManagerInterface $manager, private Ser
         }
 
         return new JsonResponse([
-            'user'  => $user->getUserIdentifier(),
+            'user' => $user->getUserIdentifier(),
             'apiToken' => $user->getApiToken(),
             'roles' => $user->getRoles(),
         ]);
     }
 
-    
 
 
 
@@ -151,7 +150,8 @@ public function __construct(private EntityManagerInterface $manager, private Ser
 
 
 
-#[Route('/account/me', name: 'me', methods: 'GET')]
+
+    #[Route('/account/me', name: 'me', methods: 'GET')]
 
 
     #[OA\Get(
@@ -179,26 +179,28 @@ public function __construct(private EntityManagerInterface $manager, private Ser
 
 
 
-#[OA\Put(
-    path: "/api/account/edit",
-    summary: "Modifier son compte utilisateur avec l'un ou tous les champs",
-    requestBody: new OA\RequestBody(
-        required: true,
-        description: "Nouvelles données éventuelles de l'utilisateur à mettre à jour",
-        content: new OA\JsonContent(
-            type: "object",
-            properties: [
-                new OA\Property(property: "firstName", type: "string", example: "Nouveau prénom"),
-            ]
-        )
-    ),
-    responses: [
-        new OA\Response(
-            response: 204,
-            description: "Utilisateur modifié avec succès"
-        )
-    ]
-)]
+    //Méthode pour modifier un utilisateur
+
+    #[OA\Put(
+        path: "/api/account/edit",
+        summary: "Modifier son compte utilisateur avec l'un ou tous les champs",
+        requestBody: new OA\RequestBody(
+            required: true,
+            description: "Nouvelles données éventuelles de l'utilisateur à mettre à jour",
+            content: new OA\JsonContent(
+                type: "object",
+                properties: [
+                    new OA\Property(property: "username", type: "string", example: "adresse@email.com")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 204,
+                description: "Utilisateur modifié avec succès"
+            )
+        ]
+    )]
 
 
 
@@ -229,8 +231,8 @@ public function __construct(private EntityManagerInterface $manager, private Ser
 
 
 
-//  Méthode pour lister les utilisateurs
-    #[Route('/users', name: 'list_users', methods:['GET'])]
+    //  Méthode pour lister les utilisateurs
+    #[Route('/users', name: 'list_users', methods: ['GET'])]
     #[OA\Get(
         path: "/api/users",
         summary: "Obtenir la liste des utilisateurs",
