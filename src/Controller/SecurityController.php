@@ -190,7 +190,8 @@ class SecurityController extends AbstractController
             content: new OA\JsonContent(
                 type: "object",
                 properties: [
-                    new OA\Property(property: "username", type: "string", example: "adresse@email.com")
+                    new OA\Property(property: "username", type: "string", example: "adresse@email.com"),
+                    new OA\Property(property: "roles", type: "array", items: new OA\Items(type: "string", example: "ROLE_USER"))
                 ]
             )
         ),
@@ -212,7 +213,7 @@ class SecurityController extends AbstractController
             'json',
             [AbstractNormalizer::OBJECT_TO_POPULATE => $this->getUser()],
         );
-        $user->setUpdatedAt(new DateTimeImmutable());
+        // $user->setUpdatedAt(new DateTimeImmutable());
 
         if (isset($request->toArray()['password'])) {
             $user->setPassword($this->passwordHasher->hashPassword($user, $user->getPassword()));
