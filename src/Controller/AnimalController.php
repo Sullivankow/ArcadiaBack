@@ -16,6 +16,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use OpenApi\Attributes as OA;
 
 #[Route('api/animal', name: 'app_api_animal')]
+
 class AnimalController extends AbstractController
 {
     public function __construct(
@@ -33,6 +34,7 @@ class AnimalController extends AbstractController
 
     #[OA\Post(
         summary: "Créer un nouvel animal",
+        tags: ["Animal"],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
@@ -120,6 +122,7 @@ class AnimalController extends AbstractController
     #[Route('/{id}', 'show', methods: ['GET'])]
     #[OA\Get(
         summary: "Afficher Animal",
+        tags: ["Animal"],
         parameters: [
             new OA\Parameter(
                 name: "id",
@@ -166,6 +169,7 @@ class AnimalController extends AbstractController
     #[Route('/{id}', name: 'edit', methods: ['PUT'])]
     #[OA\Put(
         summary: "Modifier animal",
+        tags: ["Animal"],
         parameters: [
             new OA\Parameter(
                 name: "id",
@@ -220,6 +224,7 @@ class AnimalController extends AbstractController
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
     #[OA\Delete(
         summary: "Supprimer un animal",
+        tags: ["Animal"],
         parameters: [
             new OA\Parameter(
                 name: "id",

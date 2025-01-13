@@ -36,6 +36,7 @@ class SecurityController extends AbstractController
     #[OA\Post(
         path: "/api/registration",
         summary: "Inscription d'un nouvel utilisateur",
+        tags: ["Utilisateur"],
         requestBody: new OA\RequestBody(
             required: true,
             description: "Données de l'utilisateur à inscrire",
@@ -97,6 +98,7 @@ class SecurityController extends AbstractController
     #[OA\Post(
         path: "/api/login",
         summary: "Connecter un utilisateur",
+        tags: ["Utilisateur"],
         requestBody: new OA\RequestBody(
             required: true,
             description: "Données de l’utilisateur pour se connecter",
@@ -157,6 +159,7 @@ class SecurityController extends AbstractController
     #[OA\Get(
         path: "/api/account/me",
         summary: "Récupérer toutes les informations de l'objet User",
+        tags: ["Utilisateur"],
         responses: [
             new OA\Response(
                 response: 200,
@@ -184,6 +187,7 @@ class SecurityController extends AbstractController
     #[OA\Put(
         path: "/api/account/edit",
         summary: "Modifier son compte utilisateur avec l'un ou tous les champs",
+        tags: ["Utilisateur"],
         requestBody: new OA\RequestBody(
             required: true,
             description: "Nouvelles données éventuelles de l'utilisateur à mettre à jour",
@@ -237,6 +241,7 @@ class SecurityController extends AbstractController
     #[OA\Get(
         path: "/api/users",
         summary: "Obtenir la liste des utilisateurs",
+        tags: ["Utilisateur"],
         responses: [
             new OA\Response(
                 response: 200,

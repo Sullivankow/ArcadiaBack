@@ -35,13 +35,14 @@ class RaceController extends AbstractController
 
     #[OA\Post(
         summary: "Ajouter une nouvelle race",
+        tags: ["Race"],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
                 type: "object",
                 properties: [
                     new OA\Property(property: "label", type: "string", example: "Race de l'animal"),
-                    
+
 
                 ]
             )
@@ -55,7 +56,7 @@ class RaceController extends AbstractController
                     properties: [
                         new OA\Property(property: "id", type: "integer", example: 1),
                         new OA\Property(property: "label", type: "string", example: "Race de l'animal"),
-                        
+
 
                     ]
                 )
@@ -121,6 +122,7 @@ class RaceController extends AbstractController
 
     #[OA\Get(
         summary: "Afficher la race",
+        tags: ["Race"],
         parameters: [
             new OA\Parameter(
                 name: "id",
@@ -139,7 +141,7 @@ class RaceController extends AbstractController
                     properties: [
                         new OA\Property(property: "id", type: "integer", example: 1),
                         new OA\Property(property: "label", type: "string", example: "Race de l'animal"),
-                        
+
 
                     ]
                 )
@@ -178,6 +180,7 @@ class RaceController extends AbstractController
 
     #[OA\Put(
         summary: "Modifier la race de l'animal",
+        tags: ["Race"],
         parameters: [
             new OA\Parameter(
                 name: "id",
@@ -193,7 +196,7 @@ class RaceController extends AbstractController
                 type: "object",
                 properties: [
                     new OA\Property(property: "label", type: "string", example: "Race de l'animal"),
-                    
+
 
                 ]
             )
@@ -248,6 +251,7 @@ class RaceController extends AbstractController
 
     #[OA\Delete(
         summary: "Supprimer une race",
+        tags: ["Race"],
         parameters: [
             new OA\Parameter(
                 name: "id",

@@ -29,6 +29,7 @@ class HabitatController extends AbstractController
     #[Route(methods: ['POST'])]
     #[OA\Post(
         summary: "Créer un nouvel habitat",
+        tags: ["Habitat"],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
@@ -99,6 +100,7 @@ class HabitatController extends AbstractController
     #[Route('/{id}', name: 'edit', methods: ['PUT'])]
     #[OA\Put(
         summary: "Modifier habitat",
+        tags: ["Habitat"],
         parameters: [
             new OA\Parameter(
                 name: "id",

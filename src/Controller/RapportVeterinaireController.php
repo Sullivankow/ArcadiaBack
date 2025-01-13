@@ -36,6 +36,7 @@ class RapportVeterinaireController extends AbstractController
 
     #[OA\Post(
         summary: "Créer un nouveau rapport vétérinaire",
+        tags: ["Rapport Vétérinaire"],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
@@ -122,6 +123,7 @@ class RapportVeterinaireController extends AbstractController
 
     #[OA\Get(
         summary: "Afficher le rapport vétérinaire",
+        tags: ["Rapport Vétérinaire"],
         parameters: [
             new OA\Parameter(
                 name: "id",
@@ -179,6 +181,7 @@ class RapportVeterinaireController extends AbstractController
 
     #[OA\Put(
         summary: "Modifier le rapport vétérinaire",
+        tags: ["Rapport Vétérinaire"],
         parameters: [
             new OA\Parameter(
                 name: "id",
@@ -249,6 +252,7 @@ class RapportVeterinaireController extends AbstractController
 
     #[OA\Delete(
         summary: "Supprimer un rapport vétérinaire",
+        tags: ["Rapport Vétérinaire"],
         parameters: [
             new OA\Parameter(
                 name: "id",

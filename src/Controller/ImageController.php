@@ -30,6 +30,7 @@ class ImageController extends AbstractController
     #[Route(methods: ['POST'])]
     #[OA\Post(
         summary: "Ajouter une nouvelle image",
+        tags: ["Image"],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
@@ -105,6 +106,7 @@ class ImageController extends AbstractController
     #[Route('/{id}', name: 'show', methods: ['GET'])]
     #[OA\Get(
         summary: "Afficher l'image",
+        tags: ["Image"],
         parameters: [
             new OA\Parameter(
                 name: "id",
@@ -146,6 +148,7 @@ class ImageController extends AbstractController
     #[Route('/{id}', name: 'edit', methods: ['PUT'])]
     #[OA\Put(
         summary: "Modifier l'image",
+        tags: ["Image"],
         parameters: [
             new OA\Parameter(
                 name: "id",
@@ -205,6 +208,7 @@ class ImageController extends AbstractController
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
     #[OA\Delete(
         summary: "Supprimer une image",
+        tags: ["Image"],
         parameters: [
             new OA\Parameter(
                 name: "id",
