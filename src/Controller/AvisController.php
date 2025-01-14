@@ -13,25 +13,46 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('api/avis', name: 'app_api_avis')]
 class AvisController extends AbstractController
 {
-    // Définir le schéma Avis
-    #[OA\Schema(
-        type: 'object',
-        properties: [
-            new OA\Property(property: 'id', type: 'string', description: 'Identifiant de l\'avis'),
-            new OA\Property(property: 'auteur', type: 'string', description: 'Nom de l\'auteur de l\'avis'),
-            new OA\Property(property: 'contenu', type: 'string', description: 'Contenu de l\'avis'),
-            new OA\Property(property: 'date', type: 'string', format: 'date-time', description: 'Date de création de l\'avis'),
-            new OA\Property(property: 'valide', type: 'boolean', description: 'Indicateur si l\'avis est validé ou non'),
+
+    #[Route('/', methods: ['GET'])]
+    #[OA\Get(
+        summary: 'Récupère tous les avis',
+        tags: ['Avis'],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Liste des avis',
+                content: new OA\JsonContent(
+                    type: 'array',
+                    items: new OA\Items(
+                        properties: [
+                            new OA\Property(property: 'id', type: 'string', description: 'Identifiant de l\'avis'),
+                            new OA\Property(property: 'auteur', type: 'string', description: 'Nom de l\'auteur de l\'avis'),
+                            new OA\Property(property: 'contenu', type: 'string', description: 'Contenu de l\'avis'),
+                            new OA\Property(property: 'date', type: 'string', format: 'date-time', description: 'Date de création de l\'avis'),
+                            new OA\Property(property: 'valide', type: 'boolean', description: 'Indicateur si l\'avis est validé ou non'),
+                        ]
+                    )
+                )
+            )
         ]
     )]
     public function getAvis(DocumentManager $dm): JsonResponse
     {
-        // Récupère tous les avis dans MongoDB
         $avis = $dm->getRepository(Avis::class)->findAll();
 
-        // Retourne la liste des avis en réponse JSON
-        return $this->json($avis);
+        // Transforme les objets en tableau pour la réponse JSON
+        $avisArray = array_map(fn($a) => $a->toArray(), $avis);
+
+        return $this->json($avisArray);
     }
+
+
+
+
+
+
+
 
     // Ajouter un nouvel avis
     #[Route('/new', methods: ['POST'])]
@@ -134,7 +155,7 @@ class AvisController extends AbstractController
     }
 
     // Supprimer un avis
-    #[Route('/{id}', methods: ['DELETE'])]
+    #[Route('/{id}/supprimer', methods: ['DELETE'])]
     #[OA\Delete(
         summary: 'Supprime un avis par son ID',
         tags: ['Avis'],
@@ -186,6 +207,7 @@ class AvisController extends AbstractController
         return $this->json(['message' => 'Avis supprimé avec succès']);
     }
 }
+
 
 
 

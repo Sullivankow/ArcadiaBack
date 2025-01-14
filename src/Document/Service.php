@@ -3,6 +3,7 @@
 namespace App\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[MongoDB\Document]
 class Service
@@ -11,29 +12,33 @@ class Service
     private $id;
 
     #[MongoDB\Field(type: "string")]
-    private $nom;
+    #[Assert\NotBlank]
+    private $name;
 
     #[MongoDB\Field(type: "string")]
+    #[Assert\NotBlank]
     private $description;
 
     #[MongoDB\Field(type: "float")]
-    private $prix;
+    #[Assert\Positive]
+    private $price;
 
-    // Getters et Setters
+    #[MongoDB\Field(type: "boolean")]
+    private $availability;
 
     public function getId(): ?string
     {
         return $this->id;
     }
 
-    public function getNom(): ?string
+    public function getName(): ?string
     {
-        return $this->nom;
+        return $this->name;
     }
 
-    public function setNom(string $nom): self
+    public function setName(string $name): self
     {
-        $this->nom = $nom;
+        $this->name = $name;
         return $this;
     }
 
@@ -48,14 +53,25 @@ class Service
         return $this;
     }
 
-    public function getPrix(): ?float
+    public function getPrice(): ?float
     {
-        return $this->prix;
+        return $this->price;
     }
 
-    public function setPrix(float $prix): self
+    public function setPrice(float $price): self
     {
-        $this->prix = $prix;
+        $this->price = $price;
+        return $this;
+    }
+
+    public function getAvailability(): ?bool
+    {
+        return $this->availability;
+    }
+
+    public function setAvailability(bool $availability): self
+    {
+        $this->availability = $availability;
         return $this;
     }
 }
