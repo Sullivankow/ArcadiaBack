@@ -31,6 +31,7 @@ security:
     - { path: ^/api/login, roles: PUBLIC_ACCESS }
     - { path: ^/api/doc, roles: PUBLIC_ACCESS }
     - { path: ^/api/avis/new, roles: PUBLIC_ACCESS }
+    - { path: ^/api/avis/show, roles: PUBLIC_ACCESS }
     - { path: ^/api, roles: ROLE_USER }
     - { path: ^/api/users, roles: ROLE_ADMIN }
     - { path: ^/account/me, roles: ROLE_ADMIN }
