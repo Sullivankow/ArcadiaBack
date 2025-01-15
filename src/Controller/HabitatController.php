@@ -83,7 +83,7 @@ class HabitatController extends AbstractController
         ]);
 
         $location = $this->urlGenerator->generate(
-            'app_api_habitatapp_habitat_new',
+            'app_api_habitatlist',
             ['id' => $habitat->getId()],
             UrlGeneratorInterface::ABSOLUTE_URL
         );
