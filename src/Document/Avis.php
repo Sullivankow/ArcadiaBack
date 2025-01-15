@@ -34,6 +34,11 @@ class Avis
      */
     private $valide;
 
+    /**
+     * @ODM\Field(type="int")
+     */
+    private $note;
+
     // Getters et Setters
 
     public function getId(): ?string
@@ -88,6 +93,23 @@ class Avis
 
         return $this;
     }
+
+    public function getNote(): ?int
+    {
+        return $this->note;
+    }
+
+    public function setNote(int $note): self
+    {
+        if ($note < 1 || $note > 5) {
+            throw new \InvalidArgumentException('La note doit être comprise entre 1 et 5.');
+        }
+
+        $this->note = $note;
+
+        return $this;
+    }
 }
+
 
 

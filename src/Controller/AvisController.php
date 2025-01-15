@@ -13,7 +13,6 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('api/avis', name: 'app_api_avis')]
 class AvisController extends AbstractController
 {
-
     #[Route('/', methods: ['GET'])]
     #[OA\Get(
         summary: 'Récupère tous les avis',
@@ -31,6 +30,7 @@ class AvisController extends AbstractController
                             new OA\Property(property: 'contenu', type: 'string', description: 'Contenu de l\'avis'),
                             new OA\Property(property: 'date', type: 'string', format: 'date-time', description: 'Date de création de l\'avis'),
                             new OA\Property(property: 'valide', type: 'boolean', description: 'Indicateur si l\'avis est validé ou non'),
+                            new OA\Property(property: 'note', type: 'integer', description: 'Note donnée par le visiteur (1 à 5)'),
                         ]
                     )
                 )
@@ -42,19 +42,18 @@ class AvisController extends AbstractController
         $avis = $dm->getRepository(Avis::class)->findAll();
 
         // Transforme les objets en tableau pour la réponse JSON
-        $avisArray = array_map(fn($a) => $a->toArray(), $avis);
+        $avisArray = array_map(fn($a) => [
+            'id' => $a->getId(),
+            'auteur' => $a->getAuteur(),
+            'contenu' => $a->getContenu(),
+            'date' => $a->getDate()?->format('Y-m-d H:i:s'),
+            'valide' => $a->isValide(),
+            'note' => $a->getNote(),
+        ], $avis);
 
         return $this->json($avisArray);
     }
 
-
-
-
-
-
-
-
-    // Ajouter un nouvel avis
     #[Route('/new', methods: ['POST'])]
     #[OA\Post(
         summary: 'Ajoute un nouvel avis',
@@ -62,10 +61,11 @@ class AvisController extends AbstractController
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ['contenu'],
+                required: ['contenu', 'note'],
                 properties: [
                     new OA\Property(property: 'auteur', type: 'string', description: 'Nom de l\'auteur de l\'avis'),
-                    new OA\Property(property: 'contenu', type: 'string', description: 'Contenu de l\'avis')
+                    new OA\Property(property: 'contenu', type: 'string', description: 'Contenu de l\'avis'),
+                    new OA\Property(property: 'note', type: 'integer', description: 'Note donnée par le visiteur (1 à 5)')
                 ]
             )
         ),
@@ -83,25 +83,26 @@ class AvisController extends AbstractController
     )]
     public function addAvis(Request $request, DocumentManager $dm): JsonResponse
     {
-        // Récupère les données JSON de la requête
         $data = json_decode($request->getContent(), true);
 
-        // Crée un nouvel avis à partir des données
+        // Valide la note
+        if (!isset($data['note']) || $data['note'] < 1 || $data['note'] > 5) {
+            return $this->json(['error' => 'La note doit être comprise entre 1 et 5.'], 400);
+        }
+
         $avis = new Avis();
         $avis->setAuteur($data['auteur'] ?? 'Anonyme');
         $avis->setContenu($data['contenu']);
         $avis->setDate(new \DateTime());
         $avis->setValide(false);
+        $avis->setNote($data['note']);
 
-        // Sauvegarde l'avis dans MongoDB
         $dm->persist($avis);
         $dm->flush();
 
-        // Retourne une réponse de succès
         return $this->json(['message' => 'Avis ajouté avec succès'], 201);
     }
 
-    // Valider un avis
     #[Route('/{id}/validate', methods: ['PATCH'])]
     #[OA\Patch(
         summary: 'Valide un avis par son ID',
@@ -138,23 +139,18 @@ class AvisController extends AbstractController
     )]
     public function validateAvis(string $id, DocumentManager $dm): JsonResponse
     {
-        // Recherche l'avis par son ID
         $avis = $dm->getRepository(Avis::class)->find($id);
 
         if (!$avis) {
-            // Si l'avis n'est pas trouvé, retourne une erreur 404
             return $this->json(['error' => 'Avis introuvable'], 404);
         }
 
-        // Valide l'avis
         $avis->setValide(true);
         $dm->flush();
 
-        // Retourne un message de succès
         return $this->json(['message' => 'Avis validé avec succès']);
     }
 
-    // Supprimer un avis
     #[Route('/{id}/supprimer', methods: ['DELETE'])]
     #[OA\Delete(
         summary: 'Supprime un avis par son ID',
@@ -191,28 +187,15 @@ class AvisController extends AbstractController
     )]
     public function deleteAvis(string $id, DocumentManager $dm): JsonResponse
     {
-        // Recherche l'avis par son ID
         $avis = $dm->getRepository(Avis::class)->find($id);
 
         if (!$avis) {
-            // Si l'avis n'est pas trouvé, retourne une erreur 404
             return $this->json(['error' => 'Avis introuvable'], 404);
         }
 
-        // Supprime l'avis
         $dm->remove($avis);
         $dm->flush();
 
-        // Retourne un message de succès
         return $this->json(['message' => 'Avis supprimé avec succès']);
     }
 }
-
-
-
-
-
-
-
-
-
