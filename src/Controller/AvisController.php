@@ -13,7 +13,15 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('api/avis', name: 'app_api_avis')]
 class AvisController extends AbstractController
 {
-    #[Route('/', methods: ['GET'])]
+    private DocumentManager $dm;
+
+    // Injection du service DocumentManager via le constructeur
+    public function __construct(DocumentManager $dm)
+    {
+        $this->dm = $dm;
+    }
+    // Récupérer la liste des avis
+    #[Route('/show', methods: ['GET'])]
     #[OA\Get(
         summary: 'Récupère tous les avis',
         tags: ['Avis'],
@@ -37,9 +45,14 @@ class AvisController extends AbstractController
             )
         ]
     )]
-    public function getAvis(DocumentManager $dm): JsonResponse
+    public function getAvis(): JsonResponse
     {
-        $avis = $dm->getRepository(Avis::class)->findAll();
+        $avis = $this->dm->getRepository(Avis::class)->findAll();
+
+        // Vérification si des avis existent
+        if (empty($avis)) {
+            return $this->json(['message' => 'Aucun avis trouvé'], 404);
+        }
 
         // Transforme les objets en tableau pour la réponse JSON
         $avisArray = array_map(fn($a) => [
@@ -54,6 +67,7 @@ class AvisController extends AbstractController
         return $this->json($avisArray);
     }
 
+    // Ajouter un nouvel avis
     #[Route('/new', methods: ['POST'])]
     #[OA\Post(
         summary: 'Ajoute un nouvel avis',
@@ -81,15 +95,19 @@ class AvisController extends AbstractController
             )
         ]
     )]
-    public function addAvis(Request $request, DocumentManager $dm): JsonResponse
+    public function addAvis(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
-        // Valide la note
+        // Validation des données
+        if (!isset($data['contenu']) || empty($data['contenu'])) {
+            return $this->json(['error' => 'Le contenu de l\'avis est requis.'], 400);
+        }
         if (!isset($data['note']) || $data['note'] < 1 || $data['note'] > 5) {
             return $this->json(['error' => 'La note doit être comprise entre 1 et 5.'], 400);
         }
 
+        // Création de l'avis
         $avis = new Avis();
         $avis->setAuteur($data['auteur'] ?? 'Anonyme');
         $avis->setContenu($data['contenu']);
@@ -97,12 +115,13 @@ class AvisController extends AbstractController
         $avis->setValide(false);
         $avis->setNote($data['note']);
 
-        $dm->persist($avis);
-        $dm->flush();
+        $this->dm->persist($avis);
+        $this->dm->flush();
 
         return $this->json(['message' => 'Avis ajouté avec succès'], 201);
     }
 
+    // Valider un avis
     #[Route('/{id}/validate', methods: ['PATCH'])]
     #[OA\Patch(
         summary: 'Valide un avis par son ID',
@@ -137,20 +156,21 @@ class AvisController extends AbstractController
             )
         ]
     )]
-    public function validateAvis(string $id, DocumentManager $dm): JsonResponse
+    public function validateAvis(string $id): JsonResponse
     {
-        $avis = $dm->getRepository(Avis::class)->find($id);
+        $avis = $this->dm->getRepository(Avis::class)->find($id);
 
         if (!$avis) {
             return $this->json(['error' => 'Avis introuvable'], 404);
         }
 
         $avis->setValide(true);
-        $dm->flush();
+        $this->dm->flush();
 
         return $this->json(['message' => 'Avis validé avec succès']);
     }
 
+    // Supprimer un avis
     #[Route('/{id}/supprimer', methods: ['DELETE'])]
     #[OA\Delete(
         summary: 'Supprime un avis par son ID',
@@ -185,17 +205,18 @@ class AvisController extends AbstractController
             )
         ]
     )]
-    public function deleteAvis(string $id, DocumentManager $dm): JsonResponse
+    public function deleteAvis(string $id): JsonResponse
     {
-        $avis = $dm->getRepository(Avis::class)->find($id);
+        $avis = $this->dm->getRepository(Avis::class)->find($id);
 
         if (!$avis) {
             return $this->json(['error' => 'Avis introuvable'], 404);
         }
 
-        $dm->remove($avis);
-        $dm->flush();
+        $this->dm->remove($avis);
+        $this->dm->flush();
 
         return $this->json(['message' => 'Avis supprimé avec succès']);
     }
 }
+

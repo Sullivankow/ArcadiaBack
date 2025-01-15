@@ -4,40 +4,26 @@ namespace App\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 
-/**
- * @ODM\Document
- */
+#[ODM\Document]
 class Avis
 {
-    /**
-     * @ODM\Id(strategy="AUTO")
-     */
-    private $id;
+    #[ODM\Id(strategy: "AUTO")]
+    private ?string $id = null;
 
-    /**
-     * @ODM\Field(type="string")
-     */
-    private $auteur;
+    #[ODM\Field(type: "string")]
+    private string $auteur;
 
-    /**
-     * @ODM\Field(type="string")
-     */
-    private $contenu;
+    #[ODM\Field(type: "string")]
+    private string $contenu;
 
-    /**
-     * @ODM\Field(type="date")
-     */
-    private $date;
+    #[ODM\Field(type: "date")]
+    private \DateTime $date;
 
-    /**
-     * @ODM\Field(type="bool")
-     */
-    private $valide;
+    #[ODM\Field(type: "bool")]
+    private bool $valide;
 
-    /**
-     * @ODM\Field(type="int")
-     */
-    private $note;
+    #[ODM\Field(type: "int")]
+    private int $note;
 
     // Getters et Setters
 
