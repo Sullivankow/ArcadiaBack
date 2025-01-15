@@ -32,7 +32,7 @@ class RapportVeterinaireController extends AbstractController
 
 
     //METHODE POST
-    #[Route(methods: ['POST'])]
+    #[Route('/new', methods: ['POST'])]
 
     #[OA\Post(
         summary: "Créer un nouveau rapport vétérinaire",
@@ -119,7 +119,7 @@ class RapportVeterinaireController extends AbstractController
 
     //METHODE GET
 
-    #[Route('/{id}', 'show', methods: ['GET'])]
+    #[Route('/show/{id}', 'show', methods: ['GET'])]
 
     #[OA\Get(
         summary: "Afficher le rapport vétérinaire",
@@ -176,7 +176,7 @@ class RapportVeterinaireController extends AbstractController
 
 
     //METHODE PUT
-    #[Route('/{id}', name: 'edit', methods: ['PUT'])]
+    #[Route('/update/{id}', name: 'edit', methods: ['PUT'])]
 
 
     #[OA\Put(
@@ -246,7 +246,7 @@ class RapportVeterinaireController extends AbstractController
 
     //METHODE DELETE
 
-    #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
+    #[Route('/delete/{id}', name: 'delete', methods: ['DELETE'])]
 
 
 

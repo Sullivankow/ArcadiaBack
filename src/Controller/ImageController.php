@@ -27,7 +27,7 @@ class ImageController extends AbstractController
     }
 
     // Méthode POST pour ajouter une image
-    #[Route(methods: ['POST'])]
+    #[Route('/new', methods: ['POST'])]
     #[OA\Post(
         summary: "Ajouter une nouvelle image",
         tags: ["Image"],
@@ -103,7 +103,7 @@ class ImageController extends AbstractController
     }
 
     // Méthode GET pour afficher une image
-    #[Route('/{id}', name: 'show', methods: ['GET'])]
+    #[Route('/show/{id}', name: 'show', methods: ['GET'])]
     #[OA\Get(
         summary: "Afficher l'image",
         tags: ["Image"],
@@ -145,7 +145,7 @@ class ImageController extends AbstractController
     }
 
     // Méthode PUT pour modifier une image
-    #[Route('/{id}', name: 'edit', methods: ['PUT'])]
+    #[Route('/update/{id}', name: 'edit', methods: ['PUT'])]
     #[OA\Put(
         summary: "Modifier l'image",
         tags: ["Image"],
@@ -205,7 +205,7 @@ class ImageController extends AbstractController
     }
 
     // Méthode DELETE pour supprimer une image
-    #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
+    #[Route('/delete/{id}', name: 'delete', methods: ['DELETE'])]
     #[OA\Delete(
         summary: "Supprimer une image",
         tags: ["Image"],

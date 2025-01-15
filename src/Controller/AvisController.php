@@ -122,7 +122,7 @@ class AvisController extends AbstractController
     }
 
     // Valider un avis
-    #[Route('/{id}/validate', methods: ['PATCH'])]
+    #[Route('/validate/{id}', methods: ['PATCH'])]
     #[OA\Patch(
         summary: 'Valide un avis par son ID',
         tags: ['Avis'],
@@ -171,7 +171,7 @@ class AvisController extends AbstractController
     }
 
     // Supprimer un avis
-    #[Route('/{id}/supprimer', methods: ['DELETE'])]
+    #[Route('/delete/{id}', methods: ['DELETE'])]
     #[OA\Delete(
         summary: 'Supprime un avis par son ID',
         tags: ['Avis'],

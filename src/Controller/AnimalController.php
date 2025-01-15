@@ -119,7 +119,7 @@ class AnimalController extends AbstractController
     }
 
     // METHODE GET
-    #[Route('/{id}', 'show', methods: ['GET'])]
+    #[Route('/show/{id}', 'show', methods: ['GET'])]
     #[OA\Get(
         summary: "Afficher Animal",
         tags: ["Animal"],
@@ -166,7 +166,7 @@ class AnimalController extends AbstractController
     }
 
     // METHODE PUT
-    #[Route('/{id}', name: 'edit', methods: ['PUT'])]
+    #[Route('/update/{id}', name: 'edit', methods: ['PUT'])]
     #[OA\Put(
         summary: "Modifier animal",
         tags: ["Animal"],
@@ -221,7 +221,7 @@ class AnimalController extends AbstractController
     }
 
     // METHODE DELETE
-    #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
+    #[Route('/delete/{id}', name: 'delete', methods: ['DELETE'])]
     #[OA\Delete(
         summary: "Supprimer un animal",
         tags: ["Animal"],
