@@ -26,7 +26,7 @@ class HabitatController extends AbstractController
     }
 
     // METHODE POST - Créer un nouvel habitat
-    #[Route(methods: ['POST'])]
+    #[Route('/new', methods: ['POST'], name: 'new')]
     #[OA\Post(
         summary: "Créer un nouvel habitat",
         tags: ["Habitat"],
@@ -63,32 +63,27 @@ class HabitatController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        // Désérialiser les données de l'habitat
         $habitat = $this->serializer->deserialize($request->getContent(), Habitat::class, 'json', [
             AbstractNormalizer::GROUPS => ['habitat:write'],
         ]);
 
-        // Si un image_id est fourni, récupérer l'image correspondante
         if (isset($data['image_id'])) {
             $image = $this->manager->getRepository(Image::class)->find($data['image_id']);
 
             if ($image) {
-                $habitat->addImage($image);  // Associer l'image à l'habitat
+                $habitat->addImage($image);
             }
         }
 
-        // Persister l'habitat
         $this->manager->persist($habitat);
         $this->manager->flush();
 
-        // Sérialiser la réponse
         $responseData = $this->serializer->serialize($habitat, 'json', [
             AbstractNormalizer::GROUPS => ['habitat:read'],
         ]);
 
-        // Générer l'URL de l'habitat créé
         $location = $this->urlGenerator->generate(
-            'app_api_habitatshow',
+            'app_api_habitatapp_habitat_new',
             ['id' => $habitat->getId()],
             UrlGeneratorInterface::ABSOLUTE_URL
         );
@@ -97,9 +92,9 @@ class HabitatController extends AbstractController
     }
 
     // METHODE PUT - Modifier habitat
-    #[Route('/{id}', name: 'edit', methods: ['PUT'])]
+    #[Route('/edit/{id}', name: 'edit', methods: ['PUT'])]
     #[OA\Put(
-        summary: "Modifier habitat",
+        summary: "Modifier un habitat",
         tags: ["Habitat"],
         parameters: [
             new OA\Parameter(
@@ -132,18 +127,16 @@ class HabitatController extends AbstractController
         $habitat = $this->habitatRepository->find($id);
 
         if ($habitat) {
-            // Désérialiser les données envoyées et les appliquer à l'entité existante
             $this->serializer->deserialize(
                 $request->getContent(),
                 Habitat::class,
                 'json',
                 [
-                    AbstractNormalizer::OBJECT_TO_POPULATE => $habitat, // Mettre à jour l'objet existant
+                    AbstractNormalizer::OBJECT_TO_POPULATE => $habitat,
                     AbstractNormalizer::GROUPS => ['habitat:write']
                 ]
             );
 
-            // Vérifiez si une image est envoyée et associez-la
             $data = json_decode($request->getContent(), true);
             if (isset($data['image_id'])) {
                 $image = $this->manager->getRepository(Image::class)->find($data['image_id']);
@@ -152,18 +145,84 @@ class HabitatController extends AbstractController
                 }
             }
 
-            // Enregistrer les modifications dans la base de données
             $this->manager->flush();
 
-            // Sérialiser la réponse avec les nouvelles données
             $responseData = $this->serializer->serialize($habitat, 'json', [
                 AbstractNormalizer::GROUPS => ['habitat:read'],
             ]);
 
-            // Retourner la réponse avec les données mises à jour
             return new JsonResponse($responseData, Response::HTTP_OK, [], true);
         }
 
         return new JsonResponse(['message' => 'Habitat non trouvé'], Response::HTTP_NOT_FOUND);
     }
+
+    // METHODE GET - Liste des habitats
+    #[Route('/show', name: 'list', methods: ['GET'])]
+    #[OA\Get(
+        summary: "Récupérer la liste des habitats",
+        tags: ["Habitat"],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Liste des habitats récupérée avec succès",
+                content: new OA\JsonContent(
+                    type: "array",
+                    items: new OA\Items(
+                        properties: [
+                            new OA\Property(property: "id", type: "integer", example: 1),
+                            new OA\Property(property: "nom", type: "string", example: "Savane Africaine"),
+                            new OA\Property(property: "description", type: "string", example: "Habitat pour les animaux de la savane"),
+                            new OA\Property(property: "commentaire_habitat", type: "string", example: "Habitat spacieux et bien entretenu")
+                        ]
+                    )
+                )
+            )
+        ]
+    )]
+    public function list(): JsonResponse
+    {
+        $habitats = $this->habitatRepository->findAll();
+
+        $responseData = $this->serializer->serialize($habitats, 'json', [
+            AbstractNormalizer::GROUPS => ['habitat:read'],
+        ]);
+
+        return new JsonResponse($responseData, Response::HTTP_OK, [], true);
+    }
+
+    // METHODE DELETE - Supprimer un habitat
+    #[Route('/delete/{id}', name: 'delete', methods: ['DELETE'])]
+    #[OA\Delete(
+        summary: "Supprimer un habitat",
+        tags: ["Habitat"],
+        parameters: [
+            new OA\Parameter(
+                name: "id",
+                in: "path",
+                required: true,
+                description: "ID de l'habitat à supprimer",
+                schema: new OA\Schema(type: "integer")
+            )
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Habitat supprimé avec succès"),
+            new OA\Response(response: 404, description: "Habitat non trouvé")
+        ]
+    )]
+    public function delete(int $id): JsonResponse
+    {
+        $habitat = $this->habitatRepository->find($id);
+
+        if (!$habitat) {
+            return new JsonResponse(['message' => 'Habitat non trouvé'], Response::HTTP_NOT_FOUND);
+        }
+
+        $this->manager->remove($habitat);
+        $this->manager->flush();
+
+        return new JsonResponse(['message' => 'Habitat supprimé avec succès'], Response::HTTP_OK);
+    }
 }
+
+

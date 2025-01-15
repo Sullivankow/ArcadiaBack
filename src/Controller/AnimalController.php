@@ -166,7 +166,7 @@ class AnimalController extends AbstractController
     }
 
     // METHODE PUT
-    #[Route('/update/{id}', name: 'edit', methods: ['PUT'])]
+    #[Route('/edit/{id}', name: 'edit', methods: ['PUT'])]
     #[OA\Put(
         summary: "Modifier animal",
         tags: ["Animal"],

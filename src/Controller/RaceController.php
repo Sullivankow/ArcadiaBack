@@ -31,7 +31,7 @@ class RaceController extends AbstractController
 
 
     //METHODE POST
-    #[Route('/new', methods: ['POST'])]
+    #[Route('/new', methods: ['POST'], name: 'create')]
 
     #[OA\Post(
         summary: "Ajouter une nouvelle race",
@@ -175,7 +175,7 @@ class RaceController extends AbstractController
 
 
     //METHODE PUT
-    #[Route('/update/{id}', name: 'edit', methods: ['PUT'])]
+    #[Route('/edit/{id}', name: 'edit', methods: ['PUT'])]
 
 
     #[OA\Put(

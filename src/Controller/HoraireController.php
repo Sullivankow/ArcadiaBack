@@ -86,7 +86,7 @@ class HoraireController extends AbstractController
         return $this->json(['message' => 'Horaire ajouté avec succès'], 201);
     }
 
-    #[Route('/update/{id}', methods: ['PUT'], name: 'update')]
+    #[Route('/edit/{id}', methods: ['PUT'], name: 'edit')]
     #[OA\Put(
         summary: "Mettre à jour un horaire",
         description: "Met à jour un horaire existant via son ID.",

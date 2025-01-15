@@ -27,7 +27,7 @@ class ImageController extends AbstractController
     }
 
     // Méthode POST pour ajouter une image
-    #[Route('/new', methods: ['POST'])]
+    #[Route('/new', methods: ['POST'], name: 'create')]
     #[OA\Post(
         summary: "Ajouter une nouvelle image",
         tags: ["Image"],
@@ -145,7 +145,7 @@ class ImageController extends AbstractController
     }
 
     // Méthode PUT pour modifier une image
-    #[Route('/update/{id}', name: 'edit', methods: ['PUT'])]
+    #[Route('/edit/{id}', name: 'edit', methods: ['PUT'])]
     #[OA\Put(
         summary: "Modifier l'image",
         tags: ["Image"],

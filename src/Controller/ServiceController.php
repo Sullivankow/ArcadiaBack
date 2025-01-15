@@ -14,7 +14,7 @@ use OpenApi\Attributes as OA;
 
 class ServiceController extends AbstractController
 {
-    #[Route('/new', methods: ['POST'])]
+    #[Route('/new', methods: ['POST'], name: 'create')]
     #[OA\Post(
         summary: 'Ajouter un nouveau service',
         tags: ['Service'],
@@ -59,7 +59,7 @@ class ServiceController extends AbstractController
         return $this->json(['message' => 'Service ajouté avec succès !'], Response::HTTP_CREATED);
     }
 
-    #[Route('/update/{id}', name: 'update_service', methods: ['PUT'])]
+    #[Route('/edit/{id}', name: 'edit', methods: ['PUT'])]
     #[OA\Put(
         summary: 'Mettre à jour un service',
         tags: ['Service'],
@@ -115,7 +115,7 @@ class ServiceController extends AbstractController
         return $this->json(['message' => 'Service mis à jour avec succès !']);
     }
 
-    #[Route('/delete/{id}', name: 'delete_service', methods: ['DELETE'])]
+    #[Route('/delete/{id}', name: 'delete', methods: ['DELETE'])]
     #[OA\Delete(
         summary: 'Supprimer un service',
         tags: ['Service'],
@@ -155,7 +155,7 @@ class ServiceController extends AbstractController
         return $this->json(['message' => 'Service supprimé avec succès !']);
     }
 
-    #[Route('/show', name: 'list_services', methods: ['GET'])]
+    #[Route('/show', name: 'show', methods: ['GET'])]
     #[OA\Get(
         summary: 'Lister tous les services',
         tags: ['Service'],

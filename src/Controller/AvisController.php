@@ -21,7 +21,7 @@ class AvisController extends AbstractController
         $this->dm = $dm;
     }
     // Récupérer la liste des avis
-    #[Route('/show', methods: ['GET'])]
+    #[Route('/show', methods: ['GET'], name: 'show')]
     #[OA\Get(
         summary: 'Récupère tous les avis',
         tags: ['Avis'],
@@ -68,7 +68,7 @@ class AvisController extends AbstractController
     }
 
     // Ajouter un nouvel avis
-    #[Route('/new', methods: ['POST'])]
+    #[Route('/new', methods: ['POST'], name: 'create')]
     #[OA\Post(
         summary: 'Ajoute un nouvel avis',
         tags: ['Avis'],
@@ -122,7 +122,7 @@ class AvisController extends AbstractController
     }
 
     // Valider un avis
-    #[Route('/validate/{id}', methods: ['PATCH'])]
+    #[Route('/validate/{id}', methods: ['PATCH'], name: 'validate')]
     #[OA\Patch(
         summary: 'Valide un avis par son ID',
         tags: ['Avis'],
@@ -171,7 +171,7 @@ class AvisController extends AbstractController
     }
 
     // Supprimer un avis
-    #[Route('/delete/{id}', methods: ['DELETE'])]
+    #[Route('/delete/{id}', methods: ['DELETE'], name: 'delete')]
     #[OA\Delete(
         summary: 'Supprime un avis par son ID',
         tags: ['Avis'],
