@@ -118,6 +118,79 @@ class AnimalController extends AbstractController
         return new JsonResponse($responseData, Response::HTTP_CREATED, ["Location" => $location], true);
     }
 
+    // METHODE GET (liste des animaux)
+    #[Route('/list', name: 'list', methods: ['GET'])]
+
+    #[OA\Get(
+        summary: "Afficher la liste des animaux",
+        tags: ["Animal"],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Liste des animaux récupérée avec succès",
+                content: new OA\JsonContent(
+                    type: "array",
+                    items: new OA\Items(
+                        type: "object",
+                        properties: [
+                            new OA\Property(property: "id", type: "integer", example: 1),
+                            new OA\Property(property: "prenom", type: "string", example: "Nom de l'animal"),
+                            new OA\Property(property: "etat", type: "string", example: "état de l'animal"),
+                            new OA\Property(property: "habitat_id", type: "integer", example: 1),
+                            new OA\Property(property: "race_id", type: "integer", example: 1),
+                        ]
+                    )
+                )
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Aucun animal trouvé"
+            )
+        ]
+    )]
+
+    public function list(): JsonResponse
+    {
+        $animals = $this->animalRepository->findAll();
+
+        if (count($animals) > 0) {
+            // Sérialiser la liste des animaux
+            $responseData = $this->serializer->serialize($animals, 'json', ['groups' => ['animal:read']]);
+            return new JsonResponse($responseData, Response::HTTP_OK, [], true);
+        }
+
+        return new JsonResponse(['message' => 'No animals found'], Response::HTTP_NOT_FOUND);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // METHODE GET
     #[Route('/show/{id}', 'show', methods: ['GET'])]
     #[OA\Get(
