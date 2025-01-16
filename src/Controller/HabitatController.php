@@ -158,7 +158,7 @@ class HabitatController extends AbstractController
     }
 
     // METHODE GET - Liste des habitats
-    #[Route('/show', name: 'list', methods: ['GET'])]
+    #[Route('/show', name: 'show', methods: ['GET'])]
     #[OA\Get(
         summary: "Récupérer la liste des habitats",
         tags: ["Habitat"],

@@ -3,12 +3,13 @@
 namespace App\Controller;
 use App\Entity\RapportVeterinaire;
 use App\Repository\RapportVeterinaireRepository;
+use App\Repository\AnimalRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\{JsonResponse, Request, Response};
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use OpenApi\Attributes as OA;
 
@@ -22,7 +23,9 @@ class RapportVeterinaireController extends AbstractController
 
     public function __construct(
         private EntityManagerInterface $manager,
-        private RapportVeterinaireRepository $rapportVeternaireRepository,
+        private RapportVeterinaireRepository $rapportVeterinaireRepository,
+        private AnimalRepository $animalRepository,
+        private UserRepository $userRepository,
         private SerializerInterface $serializer,
         private UrlGeneratorInterface $urlGenerator,
     ) {
@@ -43,6 +46,8 @@ class RapportVeterinaireController extends AbstractController
                 properties: [
                     new OA\Property(property: "date", type: "date", example: "Date du rapport"),
                     new OA\Property(property: "detail", type: "string", example: "Détail du rapport"),
+                    new OA\Property(property: "user_id", type: "integer", example: "id de l'utilisateur"),
+                    new OA\Property(property: "animal_id", type: "integer", example: "id de l'animal"),
 
                 ]
             )
@@ -118,20 +123,11 @@ class RapportVeterinaireController extends AbstractController
 
     //METHODE GET
 
-    #[Route('/show/{id}', 'show', methods: ['GET'])]
+    #[Route('/show', 'show', methods: ['GET'])]
 
     #[OA\Get(
-        summary: "Afficher le rapport vétérinaire",
+        summary: "Afficher la liste des rapports vétérinaire",
         tags: ["Rapport Vétérinaire"],
-        parameters: [
-            new OA\Parameter(
-                name: "id",
-                in: "path",
-                required: true,
-                description: "ID ddu rapport vétérinaire à afficher",
-                schema: new OA\Schema(type: "integer")
-            )
-        ],
         responses: [
             new OA\Response(
                 response: 200,
@@ -142,6 +138,9 @@ class RapportVeterinaireController extends AbstractController
                         new OA\Property(property: "id", type: "integer", example: 1),
                         new OA\Property(property: "date", type: "date", example: "Date du rapport"),
                         new OA\Property(property: "detail", type: "string", example: "Détail du rapport"),
+                        new OA\Property(property: "user_id", type: "integer", example: "id de l'utilisateur"),
+                        new OA\Property(property: "animal_id", type: "integer", example: "id de l'animal"),
+
 
                     ]
                 )
@@ -159,9 +158,9 @@ class RapportVeterinaireController extends AbstractController
 
 
 
-    public function show(int $id): Response
+    public function show(): Response
     {
-        $rapportVeterinaire = $this->rapportVeternaireRepository->findOneBy(['id' => $id]);
+        $rapportVeterinaire = $this->rapportVeterinaireRepository->findAll();
         // $utilisateur = Chercher utilisateur avec l'id = 1
         if ($rapportVeterinaire) {
             $responseData = $this->serializer->serialize($rapportVeterinaire, 'json');
@@ -197,6 +196,8 @@ class RapportVeterinaireController extends AbstractController
                 properties: [
                     new OA\Property(property: "date", type: "date", example: "Date du rapport vétérinaire"),
                     new OA\Property(property: "detail", type: "string", example: "Détail du rapport vétérinaire"),
+                    new OA\Property(property: "user_id", type: "integer", example: "id de l'utilisateur"),
+                    new OA\Property(property: "animal_id", type: "integer", example: "id de l'animal"),
 
                 ]
             )
@@ -222,23 +223,70 @@ class RapportVeterinaireController extends AbstractController
 
     public function edit(int $id, Request $request): JsonResponse
     {
-        $rapportVeterinaire = $this->rapportVeternaireRepository->findOneBy(['id' => $id]);
+        // Récupérer le rapport vétérinaire à modifier
+        $rapportVeterinaire = $this->rapportVeterinaireRepository->find($id);
 
-
-        if ($rapportVeterinaire) {
-            $rapportVeterinaire = $this->serializer->deserialize(
-                $request->getContent(),
-                RapportVeterinaire::class,
-                'json',
-                [AbstractNormalizer::OBJECT_TO_POPULATE => $rapportVeterinaire]
-            );
-
-            $this->manager->flush();
-            return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+        if (!$rapportVeterinaire) {
+            return new JsonResponse(['message' => 'Rapport vétérinaire non trouvé'], Response::HTTP_NOT_FOUND);
         }
-        return new JsonResponse(null, Response::HTTP_NOT_FOUND);
 
+        // Décoder les données JSON de la requête
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data) {
+            return new JsonResponse(['message' => 'Données JSON invalides'], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Modifier les champs simples
+        if (isset($data['date'])) {
+            try {
+                $date = new \DateTime($data['date']);
+                $rapportVeterinaire->setDate($date);
+            } catch (\Exception $e) {
+                return new JsonResponse(['message' => 'Format de date invalide'], Response::HTTP_BAD_REQUEST);
+            }
+        }
+
+        if (isset($data['detail'])) {
+            $rapportVeterinaire->setDetail($data['detail']);
+        }
+
+        // Modifier l'animal associé (si animal_id est fourni)
+        if (isset($data['animal_id'])) {
+            $animal = $this->animalRepository->find($data['animal_id']);
+            if ($animal) {
+                $rapportVeterinaire->setAnimal($animal);
+            } else {
+                return new JsonResponse(['message' => "Animal avec l'ID {$data['animal_id']} non trouvé"], Response::HTTP_BAD_REQUEST);
+            }
+        }
+
+        // Modifier l'utilisateur associé (si user_id est fourni)
+        if (isset($data['user_id'])) {
+            $user = $this->userRepository->find($data['user_id']);
+            if ($user) {
+                $rapportVeterinaire->setUser($user);
+            } else {
+                return new JsonResponse(['message' => "Utilisateur avec l'ID {$data['user_id']} non trouvé"], Response::HTTP_BAD_REQUEST);
+            }
+        }
+
+        // Persister les changements
+        $this->manager->flush();
+
+        // Retourner une réponse 200 avec les données mises à jour
+        return new JsonResponse([
+            'id' => $rapportVeterinaire->getId(),
+            'date' => $rapportVeterinaire->getDate()->format('Y-m-d H:i:s'),
+            'detail' => $rapportVeterinaire->getDetail(),
+            'animal' => $rapportVeterinaire->getAnimal() ? $rapportVeterinaire->getAnimal()->getId() : null,
+            'user' => $rapportVeterinaire->getUser() ? $rapportVeterinaire->getUser()->getId() : null,
+        ], Response::HTTP_OK);
     }
+
+
+
+
 
 
 
@@ -246,9 +294,6 @@ class RapportVeterinaireController extends AbstractController
     //METHODE DELETE
 
     #[Route('/delete/{id}', name: 'delete', methods: ['DELETE'])]
-
-
-
     #[OA\Delete(
         summary: "Supprimer un rapport vétérinaire",
         tags: ["Rapport Vétérinaire"],
@@ -268,7 +313,7 @@ class RapportVeterinaireController extends AbstractController
             ),
             new OA\Response(
                 response: 404,
-                description: "Raport vétérinaire non trouvé"
+                description: "Rapport vétérinaire non trouvé"
             )
         ]
     )]
@@ -276,17 +321,21 @@ class RapportVeterinaireController extends AbstractController
 
 
 
-    public function delete(int $id): Response
+    public function delete(int $id): JsonResponse
     {
-
+        // Récupérer le rapport vétérinaire à supprimer
         $rapportVeterinaire = $this->rapportVeterinaireRepository->findOneBy(['id' => $id]);
-        // $utilisateur = Chercher utilisateur avec l'id = 1
+
+        // Si le rapport vétérinaire n'est pas trouvé, renvoyer une réponse 404 Not Found
         if (!$rapportVeterinaire) {
-            throw new \Exception("no report found for {$id} id");
+            return new JsonResponse(['message' => "No report found for ID {$id}"], Response::HTTP_NOT_FOUND);
         }
 
-        $this->manager->remove($rapportVeterinaire); //S'il ne trouve pas, il supprime l'information
+        // Supprimer le rapport vétérinaire
+        $this->manager->remove($rapportVeterinaire);
         $this->manager->flush();
-        return $this->json(['Message' => 'report resource deleted'], Response::HTTP_NO_CONTENT);
+
+        // Retourner une réponse 204 No Content (pas de contenu à renvoyer)
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }

@@ -58,6 +58,7 @@ class RaceController extends AbstractController
                         new OA\Property(property: "label", type: "string", example: "Race de l'animal"),
 
 
+
                     ]
                 )
             ),
