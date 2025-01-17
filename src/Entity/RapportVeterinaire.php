@@ -21,7 +21,7 @@ class RapportVeterinaire
     private ?string $detail = null;
 
     #[ORM\ManyToOne(inversedBy: 'rapportVeterinaires')]
-    private ?User $user = null;
+    private ?User $User = null;
 
     #[ORM\ManyToOne(inversedBy: 'rapportVeterinaires')]
     private ?Animal $animal = null;
@@ -57,12 +57,12 @@ class RapportVeterinaire
 
     public function getUser(): ?User
     {
-        return $this->user;
+        return $this->User;
     }
 
-    public function setUser(?User $user): static
+    public function setUser(?User $User): static
     {
-        $this->user = $user;
+        $this->user = $User;
 
         return $this;
     }

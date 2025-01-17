@@ -13,7 +13,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use DateTimeImmutable;
 use OpenApi\Attributes as OA;
 
 
@@ -237,7 +236,7 @@ class SecurityController extends AbstractController
 
 
     //  Méthode pour lister les utilisateurs
-    #[Route('/users', name: 'list_users', methods: ['GET'])]
+    #[Route('/users', name: 'list', methods: ['GET'])]
     #[OA\Get(
         path: "/api/users",
         summary: "Obtenir la liste des utilisateurs",
@@ -275,5 +274,54 @@ class SecurityController extends AbstractController
 
         return new JsonResponse($data, Response::HTTP_OK, ['Content-Type' => 'application/json'], true);
     }
+
+    // Méthode pour supprimer un utilisateur
+    #[Route('/users/{id}', name: 'delete', methods: ['DELETE'])]
+    #[OA\Delete(
+        path: "/api/users/{id}",
+        summary: "Supprimer un utilisateur par son ID",
+        tags: ["Utilisateur"],
+        parameters: [
+            new OA\Parameter(
+                name: "id",
+                in: "path",
+                required: true,
+                description: "ID de l'utilisateur à supprimer",
+                schema: new OA\Schema(type: "integer", example: 1)
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 204,
+                description: "Utilisateur supprimé avec succès"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Utilisateur non trouvé"
+            )
+        ]
+    )]
+    public function deleteUser(int $id): JsonResponse
+    {
+        // Recherche de l'utilisateur par ID
+        $user = $this->manager->getRepository(User::class)->find($id);
+
+        if (!$user) {
+            return new JsonResponse(['message' => 'Utilisateur non trouvé'], Response::HTTP_NOT_FOUND);
+        }
+
+        // Suppression de l'utilisateur
+        $this->manager->remove($user);
+        $this->manager->flush();
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+    }
+
+
+
+
+
+
+
 
 }
