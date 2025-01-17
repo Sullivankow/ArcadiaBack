@@ -33,8 +33,12 @@ security:
     - { path: ^/api/avis/new, roles: PUBLIC_ACCESS }
     - { path: ^/api/avis/show, roles: PUBLIC_ACCESS }
     - { path: ^/api, roles: ROLE_USER }
-    - { path: ^/api/users, roles: ROLE_ADMIN }
-    - { path: ^/account/me, roles: ROLE_ADMIN }
+    - { path: ^/api/users, roles: PUBLIC_ACCESS }
+    - { path: ^/api/animal/list, roles: [ROLE_USER, ROLE_VETERINAIRE] }
+    - {
+        path: ^/account/me,
+        roles: [ROLE_USER, ROLE_ADMIN, ROLE_VETERINAIRE, ROLE_EMPLOYE],
+      }
 
     # Example for other roles
     # - { path: ^/admin, roles: ROLE_ADMIN } # Accès réservé à Admin

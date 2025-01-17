@@ -157,6 +157,11 @@ class AnimalController extends AbstractController
             // Sérialiser la liste des animaux
             $responseData = $this->serializer->serialize($animals, 'json', ['groups' => ['animal:read']]);
             return new JsonResponse($responseData, Response::HTTP_OK, [], true);
+
+
+
+
+
         }
 
         return new JsonResponse(['message' => 'No animals found'], Response::HTTP_NOT_FOUND);

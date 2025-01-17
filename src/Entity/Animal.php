@@ -14,7 +14,8 @@ class Animal
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: "integer")]
+    #[Groups(["animal:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50, nullable: true)]
