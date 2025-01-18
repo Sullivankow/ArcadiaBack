@@ -19,7 +19,7 @@ class Animal
     private ?int $id = null;
 
     #[ORM\Column(length: 50, nullable: true)]
-    #[Groups(["animal:read", "animal:write"])]  // Spécifie les groupes de sérialisation
+    #[Groups(["animal:read", "animal:write", "habitat:read"])]  // Spécifie les groupes de sérialisation
     private ?string $prenom = null;
 
     #[ORM\Column(length: 50, nullable: true)]
@@ -41,7 +41,7 @@ class Animal
 
     #[ORM\ManyToOne(inversedBy: 'animals')]
     #[Groups(["animal:read", "animal:write"])]  // Sérialisation de la race dans les groupes "animal:read" et "animal:write"
-    #[MaxDepth(1)]  // Limite la profondeur de la sérialisation
+    #[MaxDepth(1)] // Limite la profondeur de la sérialisation
     private ?Race $race = null;
 
     public function __construct()

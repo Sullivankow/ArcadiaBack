@@ -167,7 +167,7 @@ class HabitatController extends AbstractController
                 response: 200,
                 description: "Liste des habitats récupérée avec succès",
                 content: new OA\JsonContent(
-                    type: "array",
+                    type: "object",
                     items: new OA\Items(
                         properties: [
                             new OA\Property(property: "id", type: "integer", example: 1),
@@ -182,7 +182,7 @@ class HabitatController extends AbstractController
     )]
     public function list(): JsonResponse
     {
-        $habitats = $this->habitatRepository->findAll();
+        $habitats = $this->habitatRepository->findAllWithRelations();
 
         $responseData = $this->serializer->serialize($habitats, 'json', [
             AbstractNormalizer::GROUPS => ['habitat:read'],

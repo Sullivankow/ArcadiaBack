@@ -15,6 +15,8 @@ class Habitat
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+
+    #[Groups(['habitat:read', 'habitat:write'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
@@ -30,12 +32,14 @@ class Habitat
     private ?string $commentaire_habitat = null;
 
     #[ORM\OneToMany(targetEntity: Animal::class, mappedBy: 'habitat')]
-    #[Groups(['habitat:read'])]
+    // #[Groups(['habitat:read'])]
+    #[MaxDepth(1)]
+
     private Collection $animals;
 
     #[ORM\ManyToMany(targetEntity: Image::class, inversedBy: 'habitats', cascade: ['persist', 'remove'])]
     #[Groups(['habitat:read', 'habitat:write'])]
-    #[MaxDepth(1)]  // Limiter la profondeur de sérialisation pour éviter la récursion infinie
+    #[MaxDepth(1)]// Limiter la profondeur de sérialisation pour éviter la récursion infinie
     #[ORM\JoinTable(name: 'habitat_image')]
     private Collection $images;
 

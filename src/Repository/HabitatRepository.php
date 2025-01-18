@@ -16,6 +16,23 @@ class HabitatRepository extends ServiceEntityRepository
         parent::__construct($registry, Habitat::class);
     }
 
+    public function findAllWithRelations(): array
+    {
+        return $this->createQueryBuilder('h')
+            ->leftJoin('h.animals', 'a')->addSelect('a') // Charger la relation 'animals'
+            ->leftJoin('h.images', 'i')->addSelect('i')  // Charger la relation 'images'
+            ->getQuery()
+            ->getResult();
+    }
+
+
+
+
+
+
+
+
+
     //    /**
     //     * @return Habitat[] Returns an array of Habitat objects
     //     */

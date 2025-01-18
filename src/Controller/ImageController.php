@@ -89,7 +89,9 @@ class ImageController extends AbstractController
         $this->manager->flush(); //  pas besoin de persister l'habitat, il est déjà géré dans la relation ManyToMany
 
         // Sérialiser l'image pour la réponse JSON
-        $responseData = $this->serializer->serialize($image, 'json');
+        $responseData = $this->serializer->serialize($image, 'json', [
+            AbstractNormalizer::GROUPS => ['habitat:read']
+        ]);
 
         // Créer l'URL pour l'image
         $location = $this->urlGenerator->generate(

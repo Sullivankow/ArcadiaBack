@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Animal;
+use Symfony\Component\Serializer\Annotation\Ignore;
 
 #[ORM\Entity(repositoryClass: RaceRepository::class)]
 class Race
@@ -23,6 +24,7 @@ class Race
      * @var Collection<int, Animal>
      */
     #[ORM\OneToMany(targetEntity: Animal::class, mappedBy: 'race')]
+    #[Ignore] // Empêche la sérialisation pour éviter les références circulaires
     private Collection $animals;
 
     public function __construct()

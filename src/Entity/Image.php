@@ -18,12 +18,13 @@ class Image
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['image:read', 'image:create', 'image:write'])]
+    #[Groups(['image:read', 'image:create', 'image:write', 'habitat:read'])]
+
     private ?string $imagePath = null;
 
     #[ORM\ManyToMany(targetEntity: Habitat::class, mappedBy: 'images')]
-    #[Groups(['image:read'])]
-    #[MaxDepth(1)]  // Limiter la profondeur de sérialisation pour éviter la récursion infinie
+    #[Groups(['read:image'])]
+    #[MaxDepth(1)]// Limiter la profondeur de sérialisation pour éviter la récursion infinie
     private Collection $habitats;
 
     public function __construct()

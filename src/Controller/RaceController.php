@@ -174,6 +174,58 @@ class RaceController extends AbstractController
 
 
 
+    // METHODE GET - Liste des races
+    #[Route('/list', name: 'list', methods: ['GET'])]
+    #[OA\Get(
+        summary: "Afficher la liste des races",
+        tags: ["Race"],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Liste des races récupérée avec succès",
+                content: new OA\JsonContent(
+                    type: "array",
+                    items: new OA\Items(
+                        type: "object",
+                        properties: [
+                            new OA\Property(property: "id", type: "integer", example: 1),
+                            new OA\Property(property: "label", type: "string", example: "Lion"),
+                        ]
+                    )
+                )
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Aucune race trouvée"
+            )
+        ]
+    )]
+    public function list(): JsonResponse
+    {
+        // Récupère toutes les races depuis le repository
+        $races = $this->raceRepository->findAll();
+
+        // Vérifie s'il y a des races
+        if (!$races) {
+            return new JsonResponse(['message' => 'Aucune race trouvée'], Response::HTTP_NOT_FOUND);
+        }
+
+        // Sérialisation des données en JSON
+        $responseData = $this->serializer->serialize($races, 'json');
+
+        return new JsonResponse($responseData, Response::HTTP_OK, [], true);
+    }
+
+
+
+
+
+
+
+
+
+
+
 
     //METHODE PUT
     #[Route('/edit/{id}', name: 'edit', methods: ['PUT'])]
