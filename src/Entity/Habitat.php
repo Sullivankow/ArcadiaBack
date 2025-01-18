@@ -16,7 +16,7 @@ class Habitat
     #[ORM\GeneratedValue]
     #[ORM\Column]
 
-    #[Groups(['habitat:read', 'habitat:write'])]
+    #[Groups(['habitat:read', 'habitat:write', 'image:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]

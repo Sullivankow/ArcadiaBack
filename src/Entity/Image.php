@@ -15,6 +15,7 @@ class Image
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['image:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -23,7 +24,7 @@ class Image
     private ?string $imagePath = null;
 
     #[ORM\ManyToMany(targetEntity: Habitat::class, mappedBy: 'images')]
-    #[Groups(['read:image'])]
+    #[Groups(['image:read'])]
     #[MaxDepth(1)]// Limiter la profondeur de sérialisation pour éviter la récursion infinie
     private Collection $habitats;
 

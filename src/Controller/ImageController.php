@@ -139,8 +139,9 @@ class ImageController extends AbstractController
     public function show(int $id): Response
     {
         $image = $this->imageRepository->findOneBy(['id' => $id]);
+
         if ($image) {
-            $responseData = $this->serializer->serialize($image, 'json');
+            $responseData = $this->serializer->serialize($image, 'json', ['groups' => ['image:read']]);
             return new JsonResponse($responseData, Response::HTTP_OK, [], true);
         }
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
