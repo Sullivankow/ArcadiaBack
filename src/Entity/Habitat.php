@@ -23,7 +23,7 @@ class Habitat
     #[Groups(['habitat:read', 'habitat:create', 'habitat:write'])]
     private ?string $nom = null;
 
-    #[ORM\Column(length: 155)]
+    #[ORM\Column(length: 255)]
     #[Groups(['habitat:read', 'habitat:create', 'habitat:write'])]
     private ?string $description = null;
 

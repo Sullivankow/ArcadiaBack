@@ -1,21 +1,48 @@
 
 services:
-###> doctrine/mongodb-odm-bundle ###
-  mongodb:
-    # In production, you may want to use a managed database service
-    image: mongodb/mongodb-atlas-local:latest
+  backend:
+    build:
+      context: ../Zoo_ArcadiaBackend
+    ports:
+      - "8080:80"
     environment:
-      - MONGODB_INITDB_DATABASE=${MONGODB_DB:-app}
-      # You should definitely set a root username and password in production
-      - MONGODB_INITDB_ROOT_USERNAME=${MONGODB_USERNAME:-}
-      - MONGODB_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD:-}
+      - DATABASE_URL=mysql://arcadia:Arcadia123@db:3306/zoo_arcadia
+      - MONGODB_URI=mongodb+srv://Arcadia:<db_password>@arcadia.qt1cv.mongodb.net/
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: zoo_arcadia
+      MYSQL_USER: arcadia
+      MYSQL_PASSWORD: Arcadia123
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  frontend:
+    build:
+      context: ../Zoo_ArcadiaFrontend  
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_BACKEND_URL=http://localhost:8080
+
+  mongodb:
+    image: mongo:latest
+
+    environment:
+      - MONGODB_INITDB_DATABASE=my_local_db
+      - MONGODB_INITDB_ROOT_USERNAME=root
+      - MONGODB_INITDB_ROOT_PASSWORD=rootpassword
+    ports:
+      - "27017:27017"
     volumes:
       - mongodb_data:/data/db:rw
-      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
-      # - ./docker/mongodb/data:/data/db:rw
-###< doctrine/mongodb-odm-bundle ###
 
 volumes:
-###> doctrine/mongodb-odm-bundle ###
+  db_data:
   mongodb_data:
-###< doctrine/mongodb-odm-bundle ###
