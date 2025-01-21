@@ -167,7 +167,7 @@ class HabitatController extends AbstractController
                 response: 200,
                 description: "Liste des habitats récupérée avec succès",
                 content: new OA\JsonContent(
-                    type: "object",
+                    type: "array",
                     items: new OA\Items(
                         properties: [
                             new OA\Property(property: "id", type: "integer", example: 1),
