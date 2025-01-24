@@ -35,16 +35,14 @@ MySQL via XAMPP ou un autre serveur SQL.
 Étape 1 : Cloner le dépôt
 Récupérez le projet backend depuis GitHub :
 
-
 git clone https://github.com/Sullivankow/ArcadiaBack.git backend
 cd backend
 
 2 : Installer les dépendances
 Installez les dépendances nécessaires avec Composer :
 
-Dans le terminal de commande enrez : 
+Dans le terminal de commande enrez :
 composer install
-
 
 3 : Configurer la base de données
 Créer la base de données :
@@ -54,10 +52,7 @@ Accédez à mysql et créez une base de données (ex. : zoo_arcadia).
 
 Configurer l’URL de connexion à la base :
 
-Modifiez ou créez un fichier .env.local dans le dossier backend avec les informations suivantes :
-
-DATABASE_URL="mysql://arcadia:Arcadia123@127.0.0.1:3306/zoo_arcadia"
-
+Modifiez ou créez un fichier .env.local dans le dossier backend avec les informations de votre bases de données
 
 4 : Initialiser la base de données
 Exécuter les migrations :
@@ -66,22 +61,20 @@ Dans le terminal de commande entrez :
 php bin/console doctrine:migrations:migrate
 (Optionnel) Charger des données initiales : Si des fixtures sont disponibles pour des données d’exemple :
 
-Dans le terminal de commande entrez : 
+Dans le terminal de commande entrez :
 php bin/console doctrine:fixtures:load
-
 
 5 : Configurer CORS
 Assurez-vous que le fichier nelmio_cors.yaml autorise les requêtes provenant du frontend.
 Par exemple, pour un frontend accessible sur http://localhost:3000, la configuration pourrait ressembler à ceci :
 
-La configuration du fichier doit ressembler à celle-ci : 
+La configuration du fichier doit ressembler à celle-ci :
 nelmio_cors:
-    defaults:
-        allow_origin: ['http://localhost:3000']
-        allow_methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
-        allow_headers: ['Content-Type', 'Authorization']
-        max_age: 3600
-
+defaults:
+allow_origin: ['http://localhost:3000']
+allow_methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+allow_headers: ['Content-Type', 'Authorization']
+max_age: 3600
 
 6 : Lancer le serveur backend
 Démarrez le serveur Symfony :
@@ -90,7 +83,6 @@ Dans le terminal de commande entrez :
 symfony server:start
 
 Par défaut, l’API sera accessible sur http://127.0.0.1:8000.
-
 
 7 : Résolution des problèmes courants
 Erreur de connexion à la base de données :
@@ -101,7 +93,6 @@ Assurez-vous que le serveur MySQL est bien démarré.
 Problèmes de migrations :
 
 Vérifiez que les entités sont bien synchronisées avec la structure de la base de données.
-
 
 🔗 Remarque : Déploiement du frontend
 Pour une expérience complète, déployez le frontend (Il se trouve dans son repository) et configurez-le pour pointer vers le backend à l’adresse http://127.0.0.1:8000/api/doc. Consultez le guide de déploiement du frontend pour plus d’informations.
