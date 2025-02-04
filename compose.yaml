@@ -6,18 +6,18 @@ services:
     ports:
       - "8080:80"
     environment:
-      - DATABASE_URL=mysql://arcadia:Arcadia123@db:3306/zoo_arcadia
-      - MONGODB_URI=mongodb+srv://Arcadia:<db_password>@arcadia.qt1cv.mongodb.net/
+      - DATABASE_URL=mysql://root:Madinalake_3@db:3306/arcadia
+      - MONGODB_URI=mongodb+srv://Arcadia:Arcadia123@arcadia.qt1cv.mongodb.net/
     depends_on:
       - db
 
   db:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: zoo_arcadia
-      MYSQL_USER: arcadia
-      MYSQL_PASSWORD: Arcadia123
+      MYSQL_ROOT_PASSWORD: Madinalake_3
+      MYSQL_DATABASE: arcadia
+      MYSQL_USER: root
+      MYSQL_PASSWORD: Madinalake_3
     ports:
       - "3306:3306"
     volumes:
