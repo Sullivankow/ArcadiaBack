@@ -67,6 +67,52 @@ class AvisController extends AbstractController
         return $this->json($avisArray);
     }
 
+
+
+    // Récupérer uniquement les avis validés
+#[Route('/show/validated', methods: ['GET'], name: 'show_validated')]
+#[OA\Get(
+    summary: 'Récupère uniquement les avis validés',
+    tags: ['Avis'],
+    responses: [
+        new OA\Response(
+            response: 200,
+            description: 'Liste des avis validés',
+            content: new OA\JsonContent(
+                type: 'array',
+                items: new OA\Items(
+                    properties: [
+                        new OA\Property(property: 'id', type: 'string', description: 'Identifiant de l\'avis'),
+                        new OA\Property(property: 'auteur', type: 'string', description: 'Nom de l\'auteur de l\'avis'),
+                        new OA\Property(property: 'contenu', type: 'string', description: 'Contenu de l\'avis'),
+                        new OA\Property(property: 'date', type: 'string', format: 'date-time', description: 'Date de création de l\'avis'),
+                        new OA\Property(property: 'note', type: 'integer', description: 'Note donnée par le visiteur (1 à 5)'),
+                    ]
+                )
+            )
+        )
+    ]
+)]
+public function getValidatedAvis(): JsonResponse
+{
+    $avis = $this->dm->getRepository(Avis::class)->findBy(['valide' => true]);
+
+    if (empty($avis)) {
+        return $this->json(['message' => 'Aucun avis validé trouvé'], 404);
+    }
+
+    $avisArray = array_map(fn($a) => [
+        'id' => $a->getId(),
+        'auteur' => $a->getAuteur(),
+        'contenu' => $a->getContenu(),
+        'date' => $a->getDate()?->format('Y-m-d H:i:s'),
+        'note' => $a->getNote(),
+    ], $avis);
+
+    return $this->json($avisArray);
+}
+
+
     // Ajouter un nouvel avis
     #[Route('/new', methods: ['POST'], name: 'create')]
     #[OA\Post(
