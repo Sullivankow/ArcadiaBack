@@ -27,7 +27,7 @@ class ServiceController extends AbstractController
                     new OA\Property(property: 'name', type: 'string', example: 'Visite guidée'),
                     new OA\Property(property: 'description', type: 'string', example: 'Une visite guidée du zoo.'),
                     new OA\Property(property: 'price', type: 'float', example: 29.99),
-                    new OA\Property(property: 'availability', type: 'boolean', example: true)
+
                 ]
             )
         ),
@@ -51,7 +51,7 @@ class ServiceController extends AbstractController
         $service->setName($data['name']);
         $service->setDescription($data['description']);
         $service->setPrice($data['price']);
-        $service->setAvailability($data['availability']);
+
 
         $dm->persist($service);
         $dm->flush();
@@ -80,7 +80,7 @@ class ServiceController extends AbstractController
                     new OA\Property(property: 'name', type: 'string', example: 'Visite guidée mise à jour'),
                     new OA\Property(property: 'description', type: 'string', example: 'Description mise à jour.'),
                     new OA\Property(property: 'price', type: 'float', example: 39.99),
-                    new OA\Property(property: 'availability', type: 'boolean', example: false)
+                   
                 ]
             )
         ),
@@ -108,7 +108,7 @@ class ServiceController extends AbstractController
         $service->setName($data['name']);
         $service->setDescription($data['description']);
         $service->setPrice($data['price']);
-        $service->setAvailability($data['availability']);
+       
 
         $dm->flush();
 
@@ -172,7 +172,7 @@ class ServiceController extends AbstractController
                             new OA\Property(property: 'name', type: 'string', example: 'Visite guidée'),
                             new OA\Property(property: 'description', type: 'string', example: 'Une visite guidée du zoo.'),
                             new OA\Property(property: 'price', type: 'float', example: 29.99),
-                            new OA\Property(property: 'availability', type: 'boolean', example: true)
+                            
                         ]
                     )
                 )
@@ -188,10 +188,9 @@ class ServiceController extends AbstractController
             'name' => $service->getName(),
             'description' => $service->getDescription(),
             'price' => $service->getPrice(),
-            'availability' => $service->getAvailability(),
+            
         ], $services);
 
         return $this->json($data);
     }
 }
-

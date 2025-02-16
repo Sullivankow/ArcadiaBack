@@ -38,6 +38,8 @@ security:
     - { path: ^/api/animal/new, roles: [ROLE_USER, ROLE_VETERINAIRE] }
     - { path: ^/api/race/list, roles: [ROLE_USER, ROLE_VETERINAIRE] }
     - { path: ^/api/avis/show, roles: [ROLE_ADMIN, ROLE_EMPLOYE] }
+    - { path: ^/api/service/new, roles: [ROLE_ADMIN, ROLE_EMPLOYE] }
+    - { path: ^/api/service/show, roles: [ROLE_ADMIN, ROLE_EMPLOYE] }
     - {
         path: ^/api/habitat/show,
         roles: [ROLE_ADMIN, ROLE_USER, ROLE_VETERINAIRE],
