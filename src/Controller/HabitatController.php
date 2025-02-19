@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\{JsonResponse, Request, Response};
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
+
 use OpenApi\Attributes as OA;
 
 #[Route('api/habitat', name: 'app_api_habitat')]
@@ -21,7 +22,7 @@ class HabitatController extends AbstractController
         private EntityManagerInterface $manager,
         private HabitatRepository $habitatRepository,
         private SerializerInterface $serializer,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
     ) {
     }
 
@@ -38,7 +39,7 @@ class HabitatController extends AbstractController
                     new OA\Property(property: "nom", type: "string", example: "Nom de l'habitat"),
                     new OA\Property(property: "description", type: "string", example: "Description de l'habitat"),
                     new OA\Property(property: "commentaire_habitat", type: "string", example: "Commentaire sur l'habitat"),
-                    new OA\Property(property: "image_id", type: "integer", example: 1)
+                    new OA\Property(property: "image_path", type: "string", example: "default.jpg")
                 ]
             )
         ),
@@ -52,7 +53,8 @@ class HabitatController extends AbstractController
                         new OA\Property(property: "id", type: "integer", example: 1),
                         new OA\Property(property: "nom", type: "string", example: "Nom de l'habitat"),
                         new OA\Property(property: "description", type: "string", example: "Description de l'habitat"),
-                        new OA\Property(property: "commentaire_habitat", type: "string", example: "Commentaire sur l'habitat")
+                        new OA\Property(property: "commentaire_habitat", type: "string", example: "Commentaire sur l'habitat"),
+                        new OA\Property(property: "image_path", type: "string", example: "Image de l'habitat")
                     ]
                 )
             ),
@@ -67,9 +69,9 @@ class HabitatController extends AbstractController
             AbstractNormalizer::GROUPS => ['habitat:write'],
         ]);
 
-        if (isset($data['image_id'])) {
-            $image = $this->manager->getRepository(Image::class)->find($data['image_id']);
-
+        if (isset($data['image_path'])) {
+            $image = $this->manager->getRepository(Image::class)->findOneBy(['imagePath' => $data['image_path']]); // Changer 'path' en 'imagePath'
+        
             if ($image) {
                 $habitat->addImage($image);
             }
@@ -82,9 +84,10 @@ class HabitatController extends AbstractController
             AbstractNormalizer::GROUPS => ['habitat:read'],
         ]);
 
+        // Mettre à jour la génération de l'URL
         $location = $this->urlGenerator->generate(
-            'app_api_habitatlist',
-            ['id' => $habitat->getId()],
+            'app_api_habitatshow', // Assurez-vous que le nom de la route est correct
+            [],
             UrlGeneratorInterface::ABSOLUTE_URL
         );
 
@@ -183,11 +186,11 @@ class HabitatController extends AbstractController
     public function list(): JsonResponse
     {
         $habitats = $this->habitatRepository->findAllWithRelations();
-
+  
         $responseData = $this->serializer->serialize($habitats, 'json', [
             AbstractNormalizer::GROUPS => ['habitat:read'],
         ]);
-
+  
         return new JsonResponse($responseData, Response::HTTP_OK, [], true);
     }
 
@@ -224,5 +227,7 @@ class HabitatController extends AbstractController
         return new JsonResponse(['message' => 'Habitat supprimé avec succès'], Response::HTTP_OK);
     }
 }
+
+
 
 

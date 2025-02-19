@@ -49,6 +49,12 @@ class Image
 
         return $this;
     }
+    #[Groups(['image:read', 'habitat:read'])]
+    public function getImageUrl(): string
+{
+    return '/uploads/' . $this->imagePath;
+}
+
 
     public function getHabitats(): Collection
     {

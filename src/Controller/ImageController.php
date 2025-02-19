@@ -243,6 +243,105 @@ class ImageController extends AbstractController
         $this->manager->flush();
         return new JsonResponse(['message' => 'Image supprimée avec succès'], Response::HTTP_NO_CONTENT);
     }
+
+
+
+// Méthode POST pour uploader une image
+#[Route('/upload', name: 'upload', methods: ['POST'])]
+#[OA\Post(
+    summary: "Uploader une nouvelle image",
+    tags: ["Image"],
+    requestBody: new OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            type: "object",
+            properties: [
+                new OA\Property(property: "habitat_id", type: "integer", example: 3)
+            ]
+        )
+    ),
+    responses: [
+        new OA\Response(
+            response: 201,
+            description: "Image uploadée avec succès",
+            content: new OA\JsonContent(
+                type: "object",
+                properties: [
+                    new OA\Property(property: "id", type: "integer", example: 1),
+                    new OA\Property(property: "image_data", type: "string", example: "uploaded-image.jpg"),
+                ]
+            )
+        ),
+        new OA\Response(
+            response: 404,
+            description: "Habitat non trouvé"
+        ),
+        new OA\Response(
+            response: 400,
+            description: "Requête invalide"
+        )
+    ]
+)]
+public function upload(Request $request): JsonResponse
+{
+    // Récupérer le fichier uploadé
+    $file = $request->files->get('image_file');
+    $habitatId = $request->request->get('habitat_id');
+
+    // Vérifier si le fichier est valide
+    if (!$file || !$file->isValid()) {
+        return new JsonResponse(['error' => 'Fichier non valide'], Response::HTTP_BAD_REQUEST);
+    }
+
+    // Trouver l'habitat correspondant à l'ID
+    $habitat = $this->habitatRepository->find($habitatId);
+    if (!$habitat) {
+        return new JsonResponse(['error' => 'Habitat non trouvé'], Response::HTTP_NOT_FOUND);
+    }
+
+    // Générer un nom unique pour le fichier
+    $fileName = uniqid().'.'.$file->guessExtension();
+
+    // Déplacer le fichier dans le répertoire souhaité
+    $file->move($this->getParameter('images_directory'), $fileName);
+
+    // Créer une nouvelle entité Image
+    $image = new Image();
+    $image->setImagePath($fileName);
+    $image->addHabitat($habitat);
+
+    // Persister et enregistrer l'image en base de données
+    $this->manager->persist($image);
+    $this->manager->flush();
+
+    // Sérialiser l'image pour la réponse JSON
+    $responseData = $this->serializer->serialize($image, 'json', [
+        AbstractNormalizer::GROUPS => ['habitat:read']
+    ]);
+
+    // Créer l'URL pour l'image
+    $location = $this->urlGenerator->generate(
+        'app_api_imageshow',
+        ['id' => $image->getId()],
+        UrlGeneratorInterface::ABSOLUTE_URL
+    );
+
+    return new JsonResponse($responseData, Response::HTTP_CREATED, ["Location" => $location], true);
 }
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
 
 
