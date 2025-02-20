@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Animal;
 use Symfony\Component\Serializer\Annotation\Ignore;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: RaceRepository::class)]
 class Race
@@ -18,6 +19,7 @@ class Race
     private ?int $id = null;
 
     #[ORM\Column(length: 50, nullable: true)]
+    #[Groups(['animal:read'])]
     private ?string $label = null;
 
     /**
@@ -36,6 +38,7 @@ class Race
     {
         return $this->id;
     }
+
 
     public function getLabel(): ?string
     {

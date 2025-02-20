@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Repository\RapportVeterinaireRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: RapportVeterinaireRepository::class)]
 class RapportVeterinaire
@@ -21,9 +23,11 @@ class RapportVeterinaire
     private ?string $detail = null;
 
     #[ORM\ManyToOne(inversedBy: 'rapportVeterinaires')]
-    private ?User $User = null;
+    private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'rapportVeterinaires')]
+    #[Groups(["animal:read", "rapportVeterinaires:read"])]
+    #[MaxDepth(1)]
     private ?Animal $animal = null;
 
     public function getId(): ?int
@@ -57,12 +61,12 @@ class RapportVeterinaire
 
     public function getUser(): ?User
     {
-        return $this->User;
+        return $this->user;
     }
 
-    public function setUser(?User $User): static
+    public function setUser(?User $user): static
     {
-        $this->user = $User;
+        $this->user = $user;
 
         return $this;
     }

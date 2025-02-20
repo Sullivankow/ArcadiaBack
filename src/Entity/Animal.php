@@ -30,17 +30,19 @@ class Animal
      * @var Collection<int, RapportVeterinaire>
      */
     #[ORM\OneToMany(targetEntity: RapportVeterinaire::class, mappedBy: 'animal')]
-    #[Groups(["animal:read"])]  // Ne pas sérialiser les rapports dans "write"
+    #[Groups(["animal:read", "rapportVeterinaire:read"])]  // Ne pas sérialiser les rapports dans "write"
     #[MaxDepth(1)]  // Limite la profondeur de la sérialisation pour éviter les boucles infinies
     private Collection $rapportVeterinaires;
 
     #[ORM\ManyToOne(inversedBy: 'animals')]
+    
     #[Groups(["animal:read", "animal:write"])]  // Sérialisation de l'habitat dans les groupes "animal:read" et "animal:write"
     #[MaxDepth(1)]  // Limite la profondeur de la sérialisation
     private ?Habitat $habitat = null;
 
     #[ORM\ManyToOne(inversedBy: 'animals')]
-    #[Groups(["animal:read", "animal:write"])]  // Sérialisation de la race dans les groupes "animal:read" et "animal:write"
+    #[Groups(["animal:read", "animal:write"])]
+  
     #[MaxDepth(1)] // Limite la profondeur de la sérialisation
     private ?Race $race = null;
 
@@ -85,6 +87,19 @@ class Animal
     {
         return $this->rapportVeterinaires;
     }
+
+    public function setRapportVeterinaires(array $rapportVeterinaires): static
+    {
+        // On vide la collection actuelle pour éviter les doublons ou conflits
+        $this->rapportVeterinaires->clear();
+    
+        foreach ($rapportVeterinaires as $rapport) {
+            $this->addRapportVeterinaire($rapport);
+        }
+    
+        return $this;
+    }
+
 
     public function addRapportVeterinaire(RapportVeterinaire $rapportVeterinaire): static
     {
