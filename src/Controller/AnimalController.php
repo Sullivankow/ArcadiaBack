@@ -24,8 +24,7 @@ class AnimalController extends AbstractController
         private EntityManagerInterface $manager,
         private AnimalRepository $animalRepository,
         private HabitatRepository $habitatRepository,
-       
-        private RaceRepository $raceRepository,
+       private RaceRepository $raceRepository,
         private SerializerInterface $serializer,
         private UrlGeneratorInterface $urlGenerator
     ) {

@@ -33,9 +33,7 @@ class RapportVeterinaireController extends AbstractController
     }
 
 
-    //METHODE POST
     #[Route('/new', methods: ['POST'], name: 'create')]
-
     #[OA\Post(
         summary: "Créer un nouveau rapport vétérinaire",
         tags: ["Rapport Vétérinaire"],
@@ -44,247 +42,355 @@ class RapportVeterinaireController extends AbstractController
             content: new OA\JsonContent(
                 type: "object",
                 properties: [
-                    new OA\Property(property: "date", type: "date", example: "Date du rapport"),
-                    new OA\Property(property: "detail", type: "string", example: "Détail du rapport"),
-                    new OA\Property(property: "user_id", type: "integer", example: "id de l'utilisateur"),
-                    new OA\Property(property: "animal_id", type: "integer", example: "id de l'animal"),
-
+                    new OA\Property(property: "date", type: "string", format: "date", example: "2025-02-22"),
+                    new OA\Property(property: "detail", type: "string", example: "Examen de routine"),
+                    new OA\Property(property: "email", type: "string", example: "veto@example.com"),
+                    new OA\Property(property: "animal_prenom", type: "string", example: "Rex")
                 ]
             )
         ),
-        responses: [  // Utilisation correcte de 'responses' ici
+        responses: [
             new OA\Response(
                 response: 201,
-                description: "Rappor vétérinaire créé avec succès", // Correction du message
+                description: "Rapport vétérinaire créé avec succès",
                 content: new OA\JsonContent(
                     type: "object",
                     properties: [
                         new OA\Property(property: "id", type: "integer", example: 1),
-                        new OA\Property(property: "date", type: "date", example: "Date du rapport"),
-                        new OA\Property(property: "detail", type: "string", example: "Détail du rapport"),
-
+                        new OA\Property(property: "date", type: "string", format: "date", example: "2025-02-22"),
+                        new OA\Property(property: "detail", type: "string", example: "Examen de routine"),
+                        new OA\Property(property: "user_email", type: "string", example: "veto@example.com"),
+                        new OA\Property(property: "animal_prenom", type: "string", example: "Rex")
                     ]
                 )
             ),
             new OA\Response(
-                response: 404,
-                description: "Rapport vétérinaire non trouvé" // Correction du message
-            )
-        ]
-    )]
-
-
-
-
-
-
-
-
-    public function new(Request $request): JsonResponse
-    {
-        //Création d'un objet utilisateur static en dur avec de fausses données pour tester l'api
-// $utilisateur = new Utilisateur();
-// $utilisateur->setUsername('testcrud@mail.com');
-// $utilisateur->setPassword('Azerty_123');
-// $utilisateur->setNom('koko');
-// $utilisateur->setPrenom('jean');
-
-
-        //Serialiszer transforme un format en un autre format
-        $rapportVeterinaire = $this->serializer->deserialize($request->getContent(), RapportVeterinaire::class, 'json');
-
-
-
-
-        //On met l'objet sur liste d'attente avec persist puis on le push avec flush
-        $this->manager->persist($rapportVeterinaire);
-        $this->manager->flush();
-
-
-        $responseData = $this->serializer->serialize($rapportVeterinaire, 'json');
-
-        $location = $this->urlGenerator->generate(
-
-            'app_api_rapportshow',
-
-            ['id' => $rapportVeterinaire->getId()],
-
-            UrlGeneratorInterface::ABSOLUTE_URL,
-        );
-
-
-
-        //à stocker en bdd
-        return new JsonResponse($responseData, Response::HTTP_CREATED, ["Location" => $location], true);
-
-    }
-
-
-
-    //METHODE GET
-
-    #[Route('/show', 'show', methods: ['GET'])]
-
-    #[OA\Get(
-        summary: "Afficher la liste des rapports vétérinaire",
-        tags: ["Rapport Vétérinaire"],
-        responses: [
-            new OA\Response(
-                response: 200,
-                description: "Animal trouvé avec succès",
-                content: new OA\JsonContent(
-                    type: "object",
-                    properties: [
-                        new OA\Property(property: "id", type: "integer", example: 1),
-                        new OA\Property(property: "date", type: "date", example: "Date du rapport"),
-                        new OA\Property(property: "detail", type: "string", example: "Détail du rapport"),
-                        new OA\Property(property: "user_id", type: "integer", example: "id de l'utilisateur"),
-                        new OA\Property(property: "animal_id", type: "integer", example: "id de l'animal"),
-
-
-                    ]
-                )
+                response: 400,
+                description: "Données incomplètes"
             ),
             new OA\Response(
                 response: 404,
-                description: "Rapport non trouvé"
+                description: "Utilisateur ou animal non trouvé"
             )
         ]
     )]
-
-
-
-
-
-
-
-    public function show(): Response
+    public function create(Request $request): JsonResponse
     {
-        $rapportVeterinaire = $this->rapportVeterinaireRepository->findAll();
-        // $utilisateur = Chercher utilisateur avec l'id = 1
-        if ($rapportVeterinaire) {
-            $responseData = $this->serializer->serialize($rapportVeterinaire, 'json');
-            return new JsonResponse($responseData, Response::HTTP_OK, [], true);
+        $data = json_decode($request->getContent(), true);
+    
+        if (!isset($data['email'], $data['animal_prenom'], $data['date'], $data['detail'])) {
+            return $this->json(['message' => 'Données incomplètes'], Response::HTTP_BAD_REQUEST);
         }
-        return new JsonResponse(null, Response::HTTP_NOT_FOUND);
-
+    
+        $user = $this->userRepository->findOneBy(['email' => $data['email']]);
+        if (!$user) {
+            return $this->json(['message' => 'Utilisateur non trouvé'], Response::HTTP_NOT_FOUND);
+        }
+    
+        $animal = $this->animalRepository->findOneBy(['prenom' => $data['animal_prenom']]);
+        if (!$animal) {
+            return $this->json(['message' => 'Animal non trouvé'], Response::HTTP_NOT_FOUND);
+        }
+    
+        $rapport = new RapportVeterinaire();
+        $rapport->setDate(new \DateTime($data['date']));
+        $rapport->setDetail($data['detail']);
+        $rapport->setUser($user);
+        $rapport->setAnimal($animal);
+    
+        $this->manager->persist($rapport);
+        $this->manager->flush();
+    
+        return $this->json([
+            'id' => $rapport->getId(),
+            'date' => $rapport->getDate()->format('Y-m-d'),
+            'detail' => $rapport->getDetail(),
+            'user_email' => $user->getEmail(),
+            'animal_prenom' => $animal->getPrenom(),
+        ], Response::HTTP_CREATED);
     }
+    
+
+
+
+    
 
 
 
 
-    //METHODE PUT
-    #[Route('/edit/{id}', name: 'edit', methods: ['PUT'])]
 
-
-    #[OA\Put(
-        summary: "Modifier le rapport vétérinaire",
-        tags: ["Rapport Vétérinaire"],
-        parameters: [
-            new OA\Parameter(
-                name: "id",
-                in: "path",
-                required: true,
-                description: "ID du rapport vétérinaire à modifier",
-                schema: new OA\Schema(type: "integer")
-            )
-        ],
-        requestBody: new OA\RequestBody(
-            required: true,
+// METHODE GET
+#[Route('/show', 'show', methods: ['GET'])]
+#[OA\Get(
+    summary: "Afficher la liste des rapports vétérinaires",
+    tags: ["Rapport Vétérinaire"],
+    responses: [
+        new OA\Response(
+            response: 200,
+            description: "Rapports trouvés avec succès",
             content: new OA\JsonContent(
-                type: "object",
-                properties: [
-                    new OA\Property(property: "date", type: "date", example: "Date du rapport vétérinaire"),
-                    new OA\Property(property: "detail", type: "string", example: "Détail du rapport vétérinaire"),
-                    new OA\Property(property: "user_id", type: "integer", example: "id de l'utilisateur"),
-                    new OA\Property(property: "animal_id", type: "integer", example: "id de l'animal"),
-
-                ]
+                type: "array",
+                items: new OA\Items(
+                    type: "object",
+                    properties: [
+                        new OA\Property(property: "id", type: "integer", example: 1),
+                        new OA\Property(property: "date", type: "date", example: "2025-02-22"),
+                        new OA\Property(property: "detail", type: "string", example: "Détail du rapport"),
+                        new OA\Property(property: "userEmail", type: "string", example: "email@example.com"),
+                        new OA\Property(property: "animalName", type: "string", example: "Nom de l'animal"),
+                    ]
+                )
             )
         ),
-        responses: [
-            new OA\Response(
-                response: 200,
-                description: "Rapport vétérinaire modifié avec succès"
-            ),
-            new OA\Response(
-                response: 404,
-                description: "Rapport vétérnaire non trouvé"
-            )
-        ]
-    )]
+        new OA\Response(
+            response: 404,
+            description: "Aucun rapport trouvé"
+        )
+    ]
+)]
+public function show(): Response
+{
+    $rapportsVeterinaires = $this->rapportVeterinaireRepository->findAll();
 
-
-
-
-
-
-
-
-    public function edit(int $id, Request $request): JsonResponse
-    {
-        // Récupérer le rapport vétérinaire à modifier
-        $rapportVeterinaire = $this->rapportVeterinaireRepository->find($id);
-
-        if (!$rapportVeterinaire) {
-            return new JsonResponse(['message' => 'Rapport vétérinaire non trouvé'], Response::HTTP_NOT_FOUND);
+    if ($rapportsVeterinaires) {
+        $responseData = [];
+        
+        foreach ($rapportsVeterinaires as $rapport) {
+            $responseData[] = [
+                'id' => $rapport->getId(),
+                'date' => $rapport->getDate()->format('Y-m-d'),
+                'detail' => $rapport->getDetail(),
+                'userEmail' => $rapport->getUser() ? $rapport->getUser()->getEmail() : null, // Récupérer l'email de l'utilisateur
+                'animalName' => $rapport->getAnimal() ? $rapport->getAnimal()->getPrenom() : null, // Récupérer le prénom de l'animal
+            ];
         }
 
-        // Décoder les données JSON de la requête
-        $data = json_decode($request->getContent(), true);
-
-        if (!$data) {
-            return new JsonResponse(['message' => 'Données JSON invalides'], Response::HTTP_BAD_REQUEST);
-        }
-
-        // Modifier les champs simples
-        if (isset($data['date'])) {
-            try {
-                $date = new \DateTime($data['date']);
-                $rapportVeterinaire->setDate($date);
-            } catch (\Exception $e) {
-                return new JsonResponse(['message' => 'Format de date invalide'], Response::HTTP_BAD_REQUEST);
-            }
-        }
-
-        if (isset($data['detail'])) {
-            $rapportVeterinaire->setDetail($data['detail']);
-        }
-
-        // Modifier l'animal associé (si animal_id est fourni)
-        if (isset($data['animal_id'])) {
-            $animal = $this->animalRepository->find($data['animal_id']);
-            if ($animal) {
-                $rapportVeterinaire->setAnimal($animal);
-            } else {
-                return new JsonResponse(['message' => "Animal avec l'ID {$data['animal_id']} non trouvé"], Response::HTTP_BAD_REQUEST);
-            }
-        }
-
-        // Modifier l'utilisateur associé (si user_id est fourni)
-        if (isset($data['user_id'])) {
-            $user = $this->userRepository->find($data['user_id']);
-            if ($user) {
-                $rapportVeterinaire->setUser($user);
-            } else {
-                return new JsonResponse(['message' => "Utilisateur avec l'ID {$data['user_id']} non trouvé"], Response::HTTP_BAD_REQUEST);
-            }
-        }
-
-        // Persister les changements
-        $this->manager->flush();
-
-        // Retourner une réponse 200 avec les données mises à jour
-        return new JsonResponse([
-            'id' => $rapportVeterinaire->getId(),
-            'date' => $rapportVeterinaire->getDate()->format('Y-m-d H:i:s'),
-            'detail' => $rapportVeterinaire->getDetail(),
-            'animal' => $rapportVeterinaire->getAnimal() ? $rapportVeterinaire->getAnimal()->getId() : null,
-            'user' => $rapportVeterinaire->getUser() ? $rapportVeterinaire->getUser()->getId() : null,
-        ], Response::HTTP_OK);
+        return new JsonResponse($responseData, Response::HTTP_OK);
     }
 
+    return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+}
 
+
+
+
+
+
+
+
+
+
+    // //METHODE PUT
+    // #[Route('/edit/{id}', name: 'edit', methods: ['PUT'])]
+
+
+    // #[OA\Put(
+    //     summary: "Modifier le rapport vétérinaire",
+    //     tags: ["Rapport Vétérinaire"],
+    //     parameters: [
+    //         new OA\Parameter(
+    //             name: "id",
+    //             in: "path",
+    //             required: true,
+    //             description: "ID du rapport vétérinaire à modifier",
+    //             schema: new OA\Schema(type: "integer")
+    //         )
+    //     ],
+    //     requestBody: new OA\RequestBody(
+    //         required: true,
+    //         content: new OA\JsonContent(
+    //             type: "object",
+    //             properties: [
+    //                 new OA\Property(property: "date", type: "date", example: "Date du rapport vétérinaire"),
+    //                 new OA\Property(property: "detail", type: "string", example: "Détail du rapport vétérinaire"),
+    //                 new OA\Property(property: "user_id", type: "integer", example: "id de l'utilisateur"),
+    //                 new OA\Property(property: "animal_id", type: "integer", example: "id de l'animal"),
+
+    //             ]
+    //         )
+    //     ),
+    //     responses: [
+    //         new OA\Response(
+    //             response: 200,
+    //             description: "Rapport vétérinaire modifié avec succès"
+    //         ),
+    //         new OA\Response(
+    //             response: 404,
+    //             description: "Rapport vétérnaire non trouvé"
+    //         )
+    //     ]
+    // )]
+
+
+
+
+
+
+
+
+    // public function edit(int $id, Request $request): JsonResponse
+    // {
+    //     // Récupérer le rapport vétérinaire à modifier
+    //     $rapportVeterinaire = $this->rapportVeterinaireRepository->find($id);
+
+    //     if (!$rapportVeterinaire) {
+    //         return new JsonResponse(['message' => 'Rapport vétérinaire non trouvé'], Response::HTTP_NOT_FOUND);
+    //     }
+
+    //     // Décoder les données JSON de la requête
+    //     $data = json_decode($request->getContent(), true);
+
+    //     if (!$data) {
+    //         return new JsonResponse(['message' => 'Données JSON invalides'], Response::HTTP_BAD_REQUEST);
+    //     }
+
+    //     // Modifier les champs simples
+    //     if (isset($data['date'])) {
+    //         try {
+    //             $date = new \DateTime($data['date']);
+    //             $rapportVeterinaire->setDate($date);
+    //         } catch (\Exception $e) {
+    //             return new JsonResponse(['message' => 'Format de date invalide'], Response::HTTP_BAD_REQUEST);
+    //         }
+    //     }
+
+    //     if (isset($data['detail'])) {
+    //         $rapportVeterinaire->setDetail($data['detail']);
+    //     }
+
+    //     // Modifier l'animal associé (si animal_id est fourni)
+    //     if (isset($data['animal_id'])) {
+    //         $animal = $this->animalRepository->find($data['animal_id']);
+    //         if ($animal) {
+    //             $rapportVeterinaire->setAnimal($animal);
+    //         } else {
+    //             return new JsonResponse(['message' => "Animal avec l'ID {$data['animal_id']} non trouvé"], Response::HTTP_BAD_REQUEST);
+    //         }
+    //     }
+
+    //     // Modifier l'utilisateur associé (si user_id est fourni)
+    //     if (isset($data['user_id'])) {
+    //         $user = $this->userRepository->find($data['user_id']);
+    //         if ($user) {
+    //             $rapportVeterinaire->setUser($user);
+    //         } else {
+    //             return new JsonResponse(['message' => "Utilisateur avec l'ID {$data['user_id']} non trouvé"], Response::HTTP_BAD_REQUEST);
+    //         }
+    //     }
+
+    //     // Persister les changements
+    //     $this->manager->flush();
+
+    //     // Retourner une réponse 200 avec les données mises à jour
+    //     return new JsonResponse([
+    //         'id' => $rapportVeterinaire->getId(),
+    //         'date' => $rapportVeterinaire->getDate()->format('Y-m-d H:i:s'),
+    //         'detail' => $rapportVeterinaire->getDetail(),
+    //         'animal' => $rapportVeterinaire->getAnimal() ? $rapportVeterinaire->getAnimal()->getId() : null,
+    //         'user' => $rapportVeterinaire->getUser() ? $rapportVeterinaire->getUser()->getId() : null,
+    //     ], Response::HTTP_OK);
+    // }
+
+
+// METHODE PUT
+#[Route('/edit/{id}', name: 'edit', methods: ['PUT'])]
+#[OA\Put(
+    summary: "Modifier le rapport vétérinaire",
+    tags: ["Rapport Vétérinaire"],
+    parameters: [
+        new OA\Parameter(
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID du rapport vétérinaire à modifier",
+            schema: new OA\Schema(type: "integer")
+        )
+    ],
+    requestBody: new OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            type: "object",
+            properties: [
+                new OA\Property(property: "date", type: "date", example: "Date du rapport vétérinaire"),
+                new OA\Property(property: "detail", type: "string", example: "Détail du rapport vétérinaire"),
+                new OA\Property(property: "user_email", type: "string", example: "Email de l'utilisateur"),
+                new OA\Property(property: "animal_prenom", type: "string", example: "Prénom de l'animal"),
+            ]
+        )
+    ),
+    responses: [
+        new OA\Response(
+            response: 200,
+            description: "Rapport vétérinaire modifié avec succès"
+        ),
+        new OA\Response(
+            response: 404,
+            description: "Rapport vétérinaire non trouvé"
+        )
+    ]
+)]
+public function edit(int $id, Request $request): JsonResponse
+{
+    // Récupérer le rapport vétérinaire à modifier
+    $rapportVeterinaire = $this->rapportVeterinaireRepository->find($id);
+
+    if (!$rapportVeterinaire) {
+        return new JsonResponse(['message' => 'Rapport vétérinaire non trouvé'], Response::HTTP_NOT_FOUND);
+    }
+
+    // Décoder les données JSON de la requête
+    $data = json_decode($request->getContent(), true);
+
+    if (!$data) {
+        return new JsonResponse(['message' => 'Données JSON invalides'], Response::HTTP_BAD_REQUEST);
+    }
+
+    // Modifier les champs simples
+    if (isset($data['date'])) {
+        try {
+            $date = new \DateTime($data['date']);
+            $rapportVeterinaire->setDate($date);
+        } catch (\Exception $e) {
+            return new JsonResponse(['message' => 'Format de date invalide'], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    if (isset($data['detail'])) {
+        $rapportVeterinaire->setDetail($data['detail']);
+    }
+
+    // Modifier l'animal associé (si animal_prenom est fourni)
+    if (isset($data['animal_prenom'])) {
+        $animal = $this->animalRepository->findOneBy(['prenom' => $data['animal_prenom']]);
+        if ($animal) {
+            $rapportVeterinaire->setAnimal($animal);
+        } else {
+            return new JsonResponse(['message' => "Animal avec le prénom {$data['animal_prenom']} non trouvé"], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    // Modifier l'utilisateur associé (si user_email est fourni)
+    if (isset($data['user_email'])) {
+        $user = $this->userRepository->findOneBy(['email' => $data['user_email']]);
+        if ($user) {
+            $rapportVeterinaire->setUser($user);
+        } else {
+            return new JsonResponse(['message' => "Utilisateur avec l'email {$data['user_email']} non trouvé"], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    // Persister les changements
+    $this->manager->flush();
+
+    // Retourner une réponse 200 avec les données mises à jour
+    return new JsonResponse([
+        'id' => $rapportVeterinaire->getId(),
+        'date' => $rapportVeterinaire->getDate()->format('Y-m-d H:i:s'),
+        'detail' => $rapportVeterinaire->getDetail(),
+        'animal_prenom' => $rapportVeterinaire->getAnimal() ? $rapportVeterinaire->getAnimal()->getPrenom() : null,
+        'user_email' => $rapportVeterinaire->getUser() ? $rapportVeterinaire->getUser()->getEmail() : null,
+    ], Response::HTTP_OK);
+}
 
 
 
