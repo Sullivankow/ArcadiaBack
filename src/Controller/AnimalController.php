@@ -43,7 +43,7 @@ class AnimalController extends AbstractController
                     properties: [
                         new OA\Property(property: 'prenom', type: 'string', example: 'Lion'),
                         new OA\Property(property: 'etat', type: 'string', example: 'sain'),
-                        new OA\Property(property: 'habitat', type: 'string', example: 'savane'),
+                        new OA\Property(property: 'habitat', type: 'string', example: 'Savane Africaine'),
                         new OA\Property(property: 'race', type: 'string', example: 'Panthère'),
                         
                     ]

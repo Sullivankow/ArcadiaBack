@@ -29,6 +29,7 @@ security:
   access_control:
     - { path: ^/api/registration, roles: PUBLIC_ACCESS }
     - { path: ^/api/horaires/show, roles: PUBLIC_ACCESS }
+    - { path: ^/api/animal/list, roles: PUBLIC_ACCESS }
     - { path: ^/api/horaires/edit, roles: [ROLE_ADMIN, ROLE_EMPLOYE] }
     - { path: ^/api/horaires/new, roles: [ROLE_ADMIN, ROLE_EMPLOYE] }
     - { path: ^/api/horaires/delete, roles: [ROLE_ADMIN, ROLE_EMPLOYE] }
@@ -39,7 +40,7 @@ security:
     - { path: ^/api/avis/show, roles: PUBLIC_ACCESS }
     - { path: ^/api, roles: ROLE_USER }
     - { path: ^/api/users, roles: PUBLIC_ACCESS }
-    - { path: ^/api/animal/list, roles: [ROLE_USER, ROLE_VETERINAIRE] }
+
     - { path: ^/api/animal/new, roles: [ROLE_USER, ROLE_VETERINAIRE] }
     - { path: ^/api/race/list, roles: [ROLE_USER, ROLE_VETERINAIRE] }
     - { path: ^/api/service/new, roles: [ROLE_ADMIN, ROLE_EMPLOYE] }
