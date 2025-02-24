@@ -42,7 +42,7 @@ class RapportVeterinaireController extends AbstractController
             content: new OA\JsonContent(
                 type: "object",
                 properties: [
-                    new OA\Property(property: "date", type: "string", format: "date", example: "2025-02-22"),
+                    new OA\Property(property: "date", type: "string", format: "date", example: "22-02-2025"),
                     new OA\Property(property: "detail", type: "string", example: "Examen de routine"),
                     new OA\Property(property: "email", type: "string", example: "veto@example.com"),
                     new OA\Property(property: "animal_prenom", type: "string", example: "Rex")
@@ -57,7 +57,7 @@ class RapportVeterinaireController extends AbstractController
                     type: "object",
                     properties: [
                         new OA\Property(property: "id", type: "integer", example: 1),
-                        new OA\Property(property: "date", type: "string", format: "date", example: "2025-02-22"),
+                        new OA\Property(property: "date", type: "string", format: "date", example: "22-02-2025"),
                         new OA\Property(property: "detail", type: "string", example: "Examen de routine"),
                         new OA\Property(property: "user_email", type: "string", example: "veto@example.com"),
                         new OA\Property(property: "animal_prenom", type: "string", example: "Rex")
@@ -103,7 +103,7 @@ class RapportVeterinaireController extends AbstractController
     
         return $this->json([
             'id' => $rapport->getId(),
-            'date' => $rapport->getDate()->format('Y-m-d'),
+            'date' => $rapport->getDate()->format('y-m-d'),
             'detail' => $rapport->getDetail(),
             'user_email' => $user->getEmail(),
             'animal_prenom' => $animal->getPrenom(),
@@ -134,7 +134,7 @@ class RapportVeterinaireController extends AbstractController
                     type: "object",
                     properties: [
                         new OA\Property(property: "id", type: "integer", example: 1),
-                        new OA\Property(property: "date", type: "date", example: "2025-02-22"),
+                        new OA\Property(property: "date", type: "date", example: "22-02-2025"),
                         new OA\Property(property: "detail", type: "string", example: "Détail du rapport"),
                         new OA\Property(property: "userEmail", type: "string", example: "email@example.com"),
                         new OA\Property(property: "animalName", type: "string", example: "Nom de l'animal"),
@@ -158,7 +158,7 @@ public function show(): Response
         foreach ($rapportsVeterinaires as $rapport) {
             $responseData[] = [
                 'id' => $rapport->getId(),
-                'date' => $rapport->getDate()->format('Y-m-d'),
+                'date' => $rapport->getDate()->format('d-m-y'),
                 'detail' => $rapport->getDetail(),
                 'userEmail' => $rapport->getUser() ? $rapport->getUser()->getEmail() : null, // Récupérer l'email de l'utilisateur
                 'animalName' => $rapport->getAnimal() ? $rapport->getAnimal()->getPrenom() : null, // Récupérer le prénom de l'animal
@@ -197,10 +197,10 @@ public function show(): Response
         content: new OA\JsonContent(
             type: "object",
             properties: [
-                new OA\Property(property: "date", type: "date", example: "Date du rapport vétérinaire"),
+                new OA\Property(property: "animal_prenom", type: "string", example: "Prénom de l'animal"),
                 new OA\Property(property: "detail", type: "string", example: "Détail du rapport vétérinaire"),
                 new OA\Property(property: "user_email", type: "string", example: "Email de l'utilisateur"),
-                new OA\Property(property: "animal_prenom", type: "string", example: "Prénom de l'animal"),
+                new OA\Property(property: "date", type: "date", example: "Date du rapport vétérinaire"),
             ]
         )
     ),
@@ -271,10 +271,10 @@ public function edit(int $id, Request $request): JsonResponse
     // Retourner une réponse 200 avec les données mises à jour
     return new JsonResponse([
         'id' => $rapportVeterinaire->getId(),
-        'date' => $rapportVeterinaire->getDate()->format('Y-m-d H:i:s'),
-        'detail' => $rapportVeterinaire->getDetail(),
         'animal_prenom' => $rapportVeterinaire->getAnimal() ? $rapportVeterinaire->getAnimal()->getPrenom() : null,
+        'detail' => $rapportVeterinaire->getDetail(),
         'user_email' => $rapportVeterinaire->getUser() ? $rapportVeterinaire->getUser()->getEmail() : null,
+        'date' => $rapportVeterinaire->getDate()->format('Y-m-d H:i:s'),
     ], Response::HTTP_OK);
 }
 
