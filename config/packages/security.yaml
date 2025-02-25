@@ -29,6 +29,9 @@ security:
   access_control:
     - { path: ^/api/registration, roles: PUBLIC_ACCESS }
     - { path: ^/api/horaires/show, roles: PUBLIC_ACCESS }
+    - { path: ^/api/stats/click, roles: PUBLIC_ACCESS }
+    - { path: ^/api/stats/all, roles: PUBLIC_ACCESS }
+    - { path: ^/api/stats, roles: PUBLIC_ACCESS }
     - { path: ^/api/animal/list, roles: PUBLIC_ACCESS }
     - { path: ^/api/horaires/edit, roles: [ROLE_ADMIN, ROLE_EMPLOYE] }
     - { path: ^/api/horaires/new, roles: [ROLE_ADMIN, ROLE_EMPLOYE] }
@@ -54,11 +57,6 @@ security:
         path: ^/account/me,
         roles: [ROLE_USER, ROLE_ADMIN, ROLE_VETERINAIRE, ROLE_EMPLOYE],
       }
-
-    # Example for other roles
-    # - { path: ^/admin, roles: ROLE_ADMIN } # Accès réservé à Admin
-    # - { path: ^/veterinaire, roles: ROLE_VETERINAIRE }
-    # - { path: ^/employe, roles: ROLE_EMPLOYE }
 
 when@test:
   security:
