@@ -6,44 +6,31 @@ use App\Repository\AnimalRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: AnimalRepository::class)]
 class Animal
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: "integer")]
-    #[Groups(["animal:read"])]
+    #[ORM\Column]
     private ?int $id = null;
 
     #[ORM\Column(length: 50, nullable: true)]
-    #[Groups(["animal:read", "animal:write", "habitat:read"])]  // Spécifie les groupes de sérialisation
     private ?string $prenom = null;
 
     #[ORM\Column(length: 50, nullable: true)]
-    #[Groups(["animal:read", "animal:write"])]
     private ?string $etat = null;
 
     /**
      * @var Collection<int, RapportVeterinaire>
      */
     #[ORM\OneToMany(targetEntity: RapportVeterinaire::class, mappedBy: 'animal')]
-    #[Groups(["animal:read", "rapportVeterinaire:read"])]  // Ne pas sérialiser les rapports dans "write"
-    #[MaxDepth(1)]  // Limite la profondeur de la sérialisation pour éviter les boucles infinies
     private Collection $rapportVeterinaires;
 
     #[ORM\ManyToOne(inversedBy: 'animals')]
-    
-    #[Groups(["animal:read", "animal:write"])]  // Sérialisation de l'habitat dans les groupes "animal:read" et "animal:write"
-    #[MaxDepth(1)]  // Limite la profondeur de la sérialisation
     private ?Habitat $habitat = null;
 
     #[ORM\ManyToOne(inversedBy: 'animals')]
-    #[Groups(["animal:read", "animal:write"])]
-  
-    #[MaxDepth(1)] // Limite la profondeur de la sérialisation
     private ?Race $race = null;
 
     public function __construct()
@@ -87,19 +74,6 @@ class Animal
     {
         return $this->rapportVeterinaires;
     }
-
-    public function setRapportVeterinaires(array $rapportVeterinaires): static
-    {
-        // On vide la collection actuelle pour éviter les doublons ou conflits
-        $this->rapportVeterinaires->clear();
-    
-        foreach ($rapportVeterinaires as $rapport) {
-            $this->addRapportVeterinaire($rapport);
-        }
-    
-        return $this;
-    }
-
 
     public function addRapportVeterinaire(RapportVeterinaire $rapportVeterinaire): static
     {
@@ -147,3 +121,4 @@ class Animal
         return $this;
     }
 }
+
