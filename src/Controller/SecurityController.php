@@ -87,22 +87,26 @@ class SecurityController extends AbstractController
             return new JsonResponse(['message' => 'Admin non authentifié'], Response::HTTP_FORBIDDEN);
         }
     
-        // Générer l'email du zoo
-        $adminEmail = $admin->getEmail();
-        $zooEmail = "zoo-" . explode('@', $adminEmail)[0] . "@zoo-arcadia.com";
+        // Générer l'email du zoo en fonction du NOUVEL UTILISATEUR
+        $userEmail = $user->getEmail();
+        $zooEmail = "zoo-" . explode('@', $userEmail)[0] . "@zoo-arcadia.com";
     
-        // Envoyer un e-mail de bienvenue
+        // Envoyer un e-mail de bienvenue à l'utilisateur
         $subject = "Bienvenue sur Arcadia Zoo";
-        $content = "<p>Bonjour,</p><p>Votre compte a été créé avec succès.</p><p>Votre identifiant : <strong>{$zooEmail}</strong></p>";
+        $content = "<p>Bonjour,</p>
+                    <p>Votre compte a été créé avec succès.</p>
+                    <p>Votre identifiant : <strong>{$zooEmail}</strong></p>";
     
-        $mailService->sendEmail($user->getEmail(), $subject, $content);
+        $mailService->sendEmail($userEmail, $subject, $content);
     
         // Retourner la réponse JSON
         return new JsonResponse([
-            'user' => $user->getUserIdentifier(),
+            'user' => $zooEmail, // Maintenant c'est bien l'email du nouvel utilisateur
             'roles' => $user->getRoles(),
         ], Response::HTTP_CREATED);
     }
+    
+
     
 
 
