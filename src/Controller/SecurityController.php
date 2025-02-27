@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 use App\Entity\User;
-
+use App\Service\EmailService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -72,20 +72,43 @@ class SecurityController extends AbstractController
 
 
 
-    public function register(Request $request, UserPasswordHasherInterface $passwordHasher): JsonResponse
+    public function register(Request $request, UserPasswordHasherInterface $passwordHasher, EmailService $mailService): JsonResponse
     {
-
         $user = $this->serializer->deserialize($request->getContent(), User::class, 'json');
         $user->setPassword($passwordHasher->hashPassword($user, $user->getPassword()));
-
-
-
-
+    
         $this->manager->persist($user);
         $this->manager->flush();
-        return new JsonResponse(['user' => $user->getUserIdentifier(), 'apiToken' => $user->getApiToken(), 'roles' => $user->getRoles()], Response::HTTP_CREATED);
-
+    
+        // Vérifier si l'admin est connecté
+        $admin = $this->getUser();
+    
+        if (!$admin instanceof User) {
+            return new JsonResponse(['message' => 'Admin non authentifié'], Response::HTTP_FORBIDDEN);
+        }
+    
+        // Générer l'email du zoo
+        $adminEmail = $admin->getEmail();
+        $zooEmail = "zoo-" . explode('@', $adminEmail)[0] . "@zoo-arcadia.com";
+    
+        // Envoyer un e-mail de bienvenue
+        $subject = "Bienvenue sur Arcadia Zoo";
+        $content = "<p>Bonjour,</p><p>Votre compte a été créé avec succès.</p><p>Votre identifiant : <strong>{$zooEmail}</strong></p>";
+    
+        $mailService->sendEmail($user->getEmail(), $subject, $content);
+    
+        // Retourner la réponse JSON
+        return new JsonResponse([
+            'user' => $user->getUserIdentifier(),
+            'roles' => $user->getRoles(),
+        ], Response::HTTP_CREATED);
     }
+    
+
+
+
+
+
 
 
 
