@@ -70,7 +70,7 @@ class SecurityController extends AbstractController
 
 
 
-
+//Fonction pour créer un nouvel utilisateur et lui envoyer automatiquement un mail avec son username
 
     public function register(Request $request, UserPasswordHasherInterface $passwordHasher, EmailService $mailService): JsonResponse
     {
@@ -89,13 +89,15 @@ class SecurityController extends AbstractController
     
         // Générer l'email du zoo en fonction du NOUVEL UTILISATEUR
         $userEmail = $user->getEmail();
-        $zooEmail = "zoo-" . explode('@', $userEmail)[0] . "@zoo-arcadia.com";
+        $zooEmail =  explode('@', $userEmail)[0] . "@email.com";
     
         // Envoyer un e-mail de bienvenue à l'utilisateur
         $subject = "Bienvenue sur Arcadia Zoo";
         $content = "<p>Bonjour,</p>
                     <p>Votre compte a été créé avec succès.</p>
-                    <p>Votre identifiant : <strong>{$zooEmail}</strong></p>";
+                    <p>Votre identifiant : <strong>{$zooEmail}</strong></p>
+                    <p>Pour votre mot de passe merci de vous rapprocher de votre responsable qui vous le fournira</p>";
+                    
     
         $mailService->sendEmail($userEmail, $subject, $content);
     
