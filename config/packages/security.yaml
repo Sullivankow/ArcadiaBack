@@ -28,11 +28,20 @@ security:
   # Access control rules
   access_control:
     - { path: ^/api/registration, roles: PUBLIC_ACCESS }
+    - {
+        path: ^/account/me,
+        roles: [ROLE_USER, ROLE_ADMIN, ROLE_VETERINAIRE, ROLE_EMPLOYE],
+      }
+    - { path: ^/api/habitat/show, roles: PUBLIC_ACCESS }
     - { path: ^/api/horaires/show, roles: PUBLIC_ACCESS }
     - { path: ^/api/stats/click, roles: PUBLIC_ACCESS }
     - { path: ^/api/stats/all, roles: PUBLIC_ACCESS }
     - { path: ^/api/stats, roles: PUBLIC_ACCESS }
     - { path: ^/api/animal/list, roles: PUBLIC_ACCESS }
+    - { path: ^/api/animal/new, roles: ROLE_ADMIN }
+    - { path: ^/api/rapport/new, roles: [ROLE_ADMIN, ROLE_VETERINAIRE] }
+    - { path: ^/api/rapport/delete, roles: [ROLE_ADMIN, ROLE_VETERINAIRE] }
+    - { path: ^/api/rapport/edit, roles: [ROLE_ADMIN, ROLE_VETERINAIRE] }
     - { path: ^/api/horaires/edit, roles: [ROLE_ADMIN, ROLE_EMPLOYE] }
     - { path: ^/api/horaires/new, roles: [ROLE_ADMIN, ROLE_EMPLOYE] }
     - { path: ^/api/horaires/delete, roles: [ROLE_ADMIN, ROLE_EMPLOYE] }
@@ -53,10 +62,7 @@ security:
         roles: [ROLE_ADMIN, ROLE_USER, ROLE_VETERINAIRE],
       }
 
-    - {
-        path: ^/account/me,
-        roles: [ROLE_USER, ROLE_ADMIN, ROLE_VETERINAIRE, ROLE_EMPLOYE],
-      }
+    
 
 when@test:
   security:

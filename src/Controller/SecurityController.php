@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Controller;
+
+use App\Controller\Explode;
 use App\Entity\User;
 use App\Service\EmailService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -31,7 +33,7 @@ class SecurityController extends AbstractController
     }
 
     #[Route('/registration', name: 'registration', methods: ['POST'])]
-
+    
     #[OA\Post(
         path: "/api/registration",
         summary: "Inscription d'un nouvel utilisateur",
@@ -179,7 +181,7 @@ class SecurityController extends AbstractController
 
 
 
-
+//Récupérer les infos de l'utilisateur
 
     #[Route('/account/me', name: 'me', methods: 'GET')]
 
@@ -199,18 +201,29 @@ class SecurityController extends AbstractController
     public function me(): JsonResponse
     {
         $user = $this->getUser();
-
+    
+        if (!$user) {
+            return new JsonResponse(['message' => 'Utilisateur non authentifié'], Response::HTTP_UNAUTHORIZED);
+        }
+    
         $responseData = $this->serializer->serialize($user, 'json');
-
+    
         return new JsonResponse($responseData, Response::HTTP_OK, [], true);
     }
+    
+
+
+
+
+
+
+
+
+
 
     #[Route('/account/edit', name: 'edit', methods: 'PUT')]
 
-
-
-
-    //Méthode pour modifier un utilisateur
+//Méthode pour modifier un utilisateur
 
     #[OA\Put(
         path: "/api/account/edit",

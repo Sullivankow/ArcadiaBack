@@ -60,7 +60,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, RapportVeterinaire>
      */
-    #[ORM\OneToMany(targetEntity: RapportVeterinaire::class, mappedBy: 'User')]
+    #[ORM\OneToMany(targetEntity: RapportVeterinaire::class, mappedBy: 'user')]
     private Collection $rapportVeterinaires;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
@@ -110,7 +110,7 @@ $this->rapportVeterinaires = new ArrayCollection();
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
+        // Garantit un rôle de base
         $roles[] = 'ROLE_USER';
 
 
