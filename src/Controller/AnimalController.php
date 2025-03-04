@@ -85,7 +85,8 @@ class AnimalController extends AbstractController
 
      
 
-        // Persister les entités
+
+        //Persister les entités 
         $this->manager->persist($animal);
         
         $this->manager->flush();
