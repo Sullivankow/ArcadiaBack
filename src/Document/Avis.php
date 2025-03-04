@@ -7,6 +7,8 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 #[ODM\Document]
 class Avis
 {
+
+    
     #[ODM\Id(strategy: "AUTO")]
     private ?string $id = null;
 
