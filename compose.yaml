@@ -1,5 +1,15 @@
-
 services:
+  ###> symfony/mailer ###
+  mailer:
+    image: axllent/mailpit
+    ports:
+      - "1025"
+      - "8025"
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+  ###< symfony/mailer ###
+
   backend:
     build:
       context: ../Zoo_ArcadiaBackend
@@ -19,13 +29,13 @@ services:
       MYSQL_USER: root
       MYSQL_PASSWORD: Madinalake_3
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
 
   frontend:
     build:
-      context: ../Zoo_ArcadiaFrontend  
+      context: ../Zoo_ArcadiaFrontend
     ports:
       - "3000:3000"
     environment:
