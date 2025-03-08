@@ -54,7 +54,7 @@ security:
     - { path: ^/api/users, roles: PUBLIC_ACCESS }
 
     - { path: ^/api/animal/new, roles: [ROLE_USER, ROLE_VETERINAIRE] }
-    - { path: ^/api/race/list, roles: [ROLE_USER, ROLE_VETERINAIRE] }
+    - { path: ^/api/race/list, roles: [ROLE_USER, ROLE_ADMIN, ROLE_VETERINAIRE] }
     - { path: ^/api/service/new, roles: [ROLE_ADMIN, ROLE_EMPLOYE] }
 
     - {
